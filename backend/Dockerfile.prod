@@ -1,0 +1,18 @@
+# Production-optimized Dockerfile
+# Multi-stage build with JVM memory tuning for small VMs
+
+FROM eclipse-temurin:17-jdk-alpine AS build
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN apk add --no-cache maven && mvn clean package -DskipTests
+
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+
+# JVM memory tuning for containers (512MB-1GB RAM)
+ENV JAVA_OPTS="-Xmx350m -Xms256m -Xss512k -XX:+UseContainerSupport -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+UseStringDeduplication"
+
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 4000
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

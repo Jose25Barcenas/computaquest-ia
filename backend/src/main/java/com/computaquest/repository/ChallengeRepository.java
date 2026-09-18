@@ -1,0 +1,15 @@
+package com.computaquest.repository;
+
+import com.computaquest.enums.ChallengeType;
+import com.computaquest.model.Challenge;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface ChallengeRepository extends MongoRepository<Challenge, String> {
+    List<Challenge> findByIsActiveTrueOrderByOrderAsc();
+    List<Challenge> findByTypeAndIsActiveTrue(ChallengeType type);
+    List<Challenge> findByIsActiveTrue();
+}

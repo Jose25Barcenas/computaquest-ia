@@ -1,0 +1,21 @@
+# Production profile - activate with SPRING_PROFILES_ACTIVE=prod
+server:
+  port: 4000
+
+spring:
+  jackson:
+    default-property-inclusion: non_null
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    root: WARN
+    com.computaquest: INFO

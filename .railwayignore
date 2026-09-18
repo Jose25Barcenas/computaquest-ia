@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+target/
+.mvn/
+
+# Build outputs
+dist/
+build/
+*.class
+*.jar
+*.war
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+
+# Documentation
+*.md
+LICENSE
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Test files
+src/test/
+test/
+coverage/
+.nyc_output/
+
+# Misc
+*.swp
+*.swo
+*~

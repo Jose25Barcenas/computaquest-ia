@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6
+    container_name: computaquest-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: computaquest
+
+  backend:
+    build: ./backend
+    container_name: computaquest-backend
+    ports:
+      - "4000:4000"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/computaquest
+      JWT_SECRET: computaquest-production-secret-2024
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      - mongodb
+
+  frontend:
+    build: ./frontend-react
+    container_name: computaquest-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  mongodb_data:
