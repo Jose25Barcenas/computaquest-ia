@@ -92,8 +92,10 @@ public class ProgressService {
             progress.setCompleted(true);
             progress.setCompletedAt(Instant.now());
 
-            user.setXp(user.getXp() + XP_CHALLENGE_PASS);
-            user.setPoints(user.getPoints() + POINTS_CHALLENGE_PASS);
+            int xpReward = challenge.getXpReward() > 0 ? challenge.getXpReward() : XP_CHALLENGE_PASS;
+            int pointsReward = challenge.getPointsReward() > 0 ? challenge.getPointsReward() : POINTS_CHALLENGE_PASS;
+            user.setXp(user.getXp() + xpReward);
+            user.setPoints(user.getPoints() + pointsReward);
 
             if (challenge.getBadgeName() != null && !user.getBadges().contains(challenge.getBadgeName())) {
                 user.setBadges(new ArrayList<>(user.getBadges()));
