@@ -10,10 +10,10 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:computaquest-super-secret-key-change-in-production-2024}
+    secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION_MS:604800000}
   openai:
-    api-key: ${OPENAI_API_KEY:sk-your-openai-api-key-here}
+    api-key: ${OPENAI_API_KEY:NOT_CONFIGURED}
     model: gpt-3.5-turbo
     max-tokens: 300
     temperature: 0.7

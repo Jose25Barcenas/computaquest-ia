@@ -8,9 +8,10 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const controller = new AbortController()
     const token = localStorage.getItem('computaquest_token')
     if (token) {
-      api.getMe()
+      api.getMe({ signal: controller.signal })
         .then(data => {
           setUser(data.user || data)
         })
@@ -21,6 +22,7 @@ export function AuthProvider({ children }) {
     } else {
       setLoading(false)
     }
+    return () => controller.abort()
   }, [])
 
   const login = async (email, password) => {

@@ -168,7 +168,9 @@ export default function SurveyPage() {
     try {
       const data = await api.submitSurvey({
         type: surveyType,
-        demographics: demographicsData,
+        age: demographicsData.age,
+        grade: demographicsData.grade,
+        gender: demographicsData.gender,
         answers,
       })
       setResult(data)

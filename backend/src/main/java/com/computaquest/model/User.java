@@ -61,9 +61,6 @@ public class User implements UserDetails {
     @Builder.Default
     private List<String> badges = List.of();
 
-    private String resetPasswordToken;
-    private Instant resetPasswordExpire;
-
     @CreatedDate
     private Instant createdAt;
 

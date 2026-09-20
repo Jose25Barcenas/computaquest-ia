@@ -6,6 +6,7 @@ import com.computaquest.service.SurveyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +52,7 @@ public class SurveyController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SurveyDTO>> getAllSurveys() {
         return ResponseEntity.ok(surveyService.getAllSurveys());
     }

@@ -8,7 +8,9 @@ import com.computaquest.repository.ChallengeRepository;
 import com.computaquest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -17,12 +19,19 @@ import java.util.Map;
 
 @Slf4j
 @Component
+@Profile("!prod")
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final ChallengeRepository challengeRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${admin.email:admin@computaquest.com}")
+    private String adminEmail;
+
+    @Value("${admin.password:admin123}")
+    private String adminPassword;
 
     @Override
     public void run(String... args) {
@@ -31,16 +40,16 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedAdmin() {
-        if (!userRepository.existsByEmail("admin@computaquest.com")) {
+        if (!userRepository.existsByEmail(adminEmail)) {
             User admin = User.builder()
                     .name("Administrador")
-                    .email("admin@computaquest.com")
-                    .password(passwordEncoder.encode("admin123"))
+                    .email(adminEmail)
+                    .password(passwordEncoder.encode(adminPassword))
                     .role(Role.ADMIN)
                     .avatar("avatar1")
                     .build();
             userRepository.save(admin);
-            log.info("Usuario admin creado: admin@computaquest.com / admin123");
+            log.info("Usuario admin creado exitosamente");
         }
     }
 

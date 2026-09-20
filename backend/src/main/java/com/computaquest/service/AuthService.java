@@ -2,7 +2,6 @@ package com.computaquest.service;
 
 import com.computaquest.dto.*;
 import com.computaquest.exception.ResourceNotFoundException;
-import com.computaquest.exception.UnauthorizedException;
 import com.computaquest.exception.ValidationAppException;
 import com.computaquest.model.User;
 import com.computaquest.repository.UserRepository;
@@ -64,6 +63,13 @@ public class AuthService {
     public User getCurrentUser(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+    }
+
+    public AuthResponse getCurrentUserResponse(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+        String token = tokenProvider.generateToken(user.getEmail());
+        return buildAuthResponse(user, token);
     }
 
     public AuthResponse updateProfile(String email, ProfileUpdateRequest request) {

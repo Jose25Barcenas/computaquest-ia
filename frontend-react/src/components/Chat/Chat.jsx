@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useToast } from '../../context/ToastContext'
+import api from '../../services/api'
 
 export default function Chat({ user }) {
   const [chats, setChats] = useState([])
@@ -20,7 +21,7 @@ export default function Chat({ user }) {
 
   const loadChats = async () => {
     try {
-      const data = await import('../../services/api').then(m => m.default.getUserChats())
+      const data = await api.getUserChats()
       setChats(data)
     } catch (error) {
       toast.error('Error al cargar chats')
@@ -29,7 +30,7 @@ export default function Chat({ user }) {
 
   const loadChatHistory = async (chatId) => {
     try {
-      const data = await import('../../services/api').then(m => m.default.getChatHistory(chatId))
+      const data = await api.getChatHistory(chatId)
       setMessages(data)
       setActiveChat(chatId)
     } catch (error) {
@@ -47,7 +48,6 @@ export default function Chat({ user }) {
     setLoading(true)
 
     try {
-      const api = (await import('../../services/api')).default
       const data = await api.sendChatMessage({
         message: userMessage.content,
         chatId: activeChat || undefined,

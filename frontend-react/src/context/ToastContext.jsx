@@ -1,17 +1,20 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useRef } from 'react'
 import Toast from '../components/Toast/Toast'
 
 const ToastContext = createContext(null)
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([])
+  const timersRef = useRef(new Set())
 
   const addToast = useCallback((message, type = 'info', duration = 3000) => {
     const id = Date.now()
     setToasts(prev => [...prev, { id, message, type }])
-    setTimeout(() => {
+    const timerId = setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id))
+      timersRef.current.delete(timerId)
     }, duration)
+    timersRef.current.add(timerId)
   }, [])
 
   const success = useCallback((msg) => addToast(msg, 'success'), [addToast])

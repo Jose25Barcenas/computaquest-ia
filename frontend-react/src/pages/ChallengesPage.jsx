@@ -25,10 +25,10 @@ export default function ChallengesPage() {
   }
 
   const typeInfo = {
-    DECOMPOSITION: { icon: 'fa-puzzle-piece', color: '#6366f1', label: 'Descomposicion' },
-    PATTERNS: { icon: 'fa-magnifying-glass', color: '#10b981', label: 'Patrones' },
-    ABSTRACTION: { icon: 'fa-filter', color: '#f59e0b', label: 'Abstraccion' },
-    ALGORITHMS: { icon: 'fa-code', color: '#ef4444', label: 'Algoritmos' },
+    decomposition: { icon: 'fa-puzzle-piece', color: '#6366f1', label: 'Descomposicion' },
+    patterns: { icon: 'fa-magnifying-glass', color: '#10b981', label: 'Patrones' },
+    abstraction: { icon: 'fa-filter', color: '#f59e0b', label: 'Abstraccion' },
+    algorithms: { icon: 'fa-code', color: '#ef4444', label: 'Algoritmos' },
   }
 
   const difficultyStars = (n) => {

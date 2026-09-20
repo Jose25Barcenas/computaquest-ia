@@ -12,12 +12,14 @@ import com.computaquest.repository.ChallengeRepository;
 import com.computaquest.repository.ProgressRepository;
 import com.computaquest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +37,32 @@ public class ProgressService {
 
     public List<ProgressDTO> getUserProgress(String userId) {
         List<Progress> progressList = progressRepository.findByUser(userId);
-        return progressList.stream().map(this::toDTO).toList();
+        if (progressList.isEmpty()) {
+            return List.of();
+        }
+
+        List<String> challengeIds = progressList.stream()
+                .map(Progress::getChallenge)
+                .distinct()
+                .toList();
+
+        Map<String, Challenge> challengeMap = challengeRepository.findAllById(challengeIds).stream()
+                .collect(Collectors.toMap(Challenge::getId, c -> c));
+
+        return progressList.stream().map(progress -> {
+            Challenge challenge = challengeMap.get(progress.getChallenge());
+            return ProgressDTO.builder()
+                    .id(progress.getId())
+                    .challengeId(progress.getChallenge())
+                    .challengeTitle(challenge != null ? challenge.getTitle() : null)
+                    .challengeType(challenge != null ? challenge.getType() : null)
+                    .challengeDifficulty(challenge != null ? challenge.getDifficulty() : null)
+                    .completed(progress.getCompleted())
+                    .score(progress.getScore())
+                    .attempts(progress.getAttempts())
+                    .completedAt(progress.getCompletedAt())
+                    .build();
+        }).toList();
     }
 
     public ProgressDTO completeChallenge(String userEmail, CompleteChallengeRequest request) {
@@ -89,9 +116,9 @@ public class ProgressService {
     }
 
     public List<LeaderboardEntry> getLeaderboard() {
-        List<User> topUsers = userRepository.findAll().stream()
+        List<User> topUsers = userRepository.findAll(Sort.by(Sort.Direction.DESC, "points"))
+                .stream()
                 .filter(u -> u.getRole() == com.computaquest.enums.Role.STUDENT)
-                .sorted((a, b) -> Integer.compare(b.getPoints(), a.getPoints()))
                 .limit(10)
                 .toList();
 

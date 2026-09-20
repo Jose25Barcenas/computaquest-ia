@@ -40,19 +40,19 @@ export default function ChallengePage() {
       setCompleted(true)
       setResult(data)
 
+      const xpEarned = score >= 70 ? (challenge?.xpReward || 100) : Math.floor((challenge?.xpReward || 100) / 2)
+      const ptsEarned = score >= 70 ? (challenge?.pointsReward || 10) : Math.floor((challenge?.pointsReward || 10) / 2)
+
       if (score >= 70) {
-        toast.success(`¡Reto completado! +100 XP, +10 pts`)
-        updateUser({
-          xp: (user.xp || 0) + 100,
-          points: (user.points || 0) + 10,
-        })
+        toast.success(`¡Reto completado! +${xpEarned} XP, +${ptsEarned} pts`)
       } else {
-        toast.info(`Puntuacion: ${score}%. Necesitas 70% para pasar. +50 XP, +5 pts`)
-        updateUser({
-          xp: (user.xp || 0) + 50,
-          points: (user.points || 0) + 5,
-        })
+        toast.info(`Puntuacion: ${score}%. Necesitas 70% para pasar. +${xpEarned} XP, +${ptsEarned} pts`)
       }
+
+      updateUser({
+        xp: (user.xp || 0) + xpEarned,
+        points: (user.points || 0) + ptsEarned,
+      })
     } catch (error) {
       toast.error(error.message || 'Error al guardar progreso')
     }
@@ -117,8 +117,8 @@ export default function ChallengePage() {
           <div className="challenge-completed glass-panel">
             <i className="fa-solid fa-circle-check"></i>
             <h2>¡Reto Completado!</h2>
-            <p>Puntuacion: {result?.score}%</p>
-            <p>+{result?.score >= 70 ? '100 XP, 10 pts' : '50 XP, 5 pts'}</p>
+            <p>Puntuacion: {result?.score || 0}%</p>
+            <p>+{result?.score >= 70 ? `${challenge?.xpReward || 100} XP, ${challenge?.pointsReward || 10} pts` : `${Math.floor((challenge?.xpReward || 100) / 2)} XP, ${Math.floor((challenge?.pointsReward || 10) / 2)} pts`}</p>
             <button className="btn-primary" onClick={() => navigate('/challenges')}>
               <i className="fa-solid fa-gamepad"></i> Seguir Jugando
             </button>

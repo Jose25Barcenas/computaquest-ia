@@ -22,6 +22,7 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final OpenAiConfig openAiConfig;
+    private final RestTemplate restTemplate;
 
     private static final String SYSTEM_PROMPT = """
             Eres el Tutor de ComputaQuest IA, una plataforma educativa que enseña pensamiento computacional a estudiantes de secundaria.
@@ -108,8 +109,6 @@ public class ChatService {
 
     private String callOpenAI(Chat chat) {
         try {
-            RestTemplate restTemplate = new RestTemplate();
-
             List<Map<String, String>> messages = new ArrayList<>();
             messages.add(Map.of("role", "system", "content", SYSTEM_PROMPT));
 

@@ -25,10 +25,6 @@ build/
 .DS_Store
 Thumbs.db
 
-# Docker
-docker-compose*.yml
-Dockerfile*
-
 # Documentation
 *.md
 LICENSE

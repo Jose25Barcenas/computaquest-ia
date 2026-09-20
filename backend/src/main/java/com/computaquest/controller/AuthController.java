@@ -35,9 +35,7 @@ public class AuthController {
     @GetMapping("/me")
     @Operation(summary = "Obtener perfil", description = "Retorna el perfil del usuario autenticado")
     public ResponseEntity<AuthResponse> getMe(Authentication authentication) {
-        var user = authService.getCurrentUser(authentication.getName());
-        String token = "";
-        return ResponseEntity.ok(authService.updateProfile(authentication.getName(), new ProfileUpdateRequest()));
+        return ResponseEntity.ok(authService.getCurrentUserResponse(authentication.getName()));
     }
 
     @PutMapping("/profile")
@@ -46,10 +44,5 @@ public class AuthController {
             Authentication authentication,
             @Valid @RequestBody ProfileUpdateRequest request) {
         return ResponseEntity.ok(authService.updateProfile(authentication.getName(), request));
-    }
-
-    @GetMapping("/users")
-    public ResponseEntity<Map<String, Object>> getUsers() {
-        return ResponseEntity.ok(Map.of("users", Map.of()));
     }
 }
