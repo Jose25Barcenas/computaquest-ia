@@ -697,6 +697,10 @@ body {
     padding: 1rem;
   }
   
+  .survey-type-grid {
+    grid-template-columns: 1fr;
+  }
+  
   .survey-options {
     flex-direction: column;
   }
