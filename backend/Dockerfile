@@ -8,4 +8,5 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 4000
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD wget -q --spider http://localhost:4000/api/health || exit 1
 ENTRYPOINT ["java", "-jar", "app.jar"]
