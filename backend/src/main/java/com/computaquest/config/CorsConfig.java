@@ -22,7 +22,7 @@ public class CorsConfig {
         for (int i = 0; i < origins.length; i++) {
             origins[i] = origins[i].trim();
         }
-        configuration.setAllowedOrigins(List.of(origins));
+        configuration.setAllowedOriginPatterns(List.of(origins));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
