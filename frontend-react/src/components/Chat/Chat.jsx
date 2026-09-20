@@ -87,7 +87,7 @@ export default function Chat({ user }) {
         </div>
       )}
 
-      <div className="chat-messages">
+      <div className="chat-messages" role="log" aria-live="polite">
         {messages.length === 0 && (
           <div className="chat-empty">
             <i className="fa-solid fa-robot"></i>
@@ -125,10 +125,12 @@ export default function Chat({ user }) {
       <form className="chat-input" onSubmit={sendMessage}>
         <input
           type="text"
+          id="chat-input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Escribe tu pregunta..."
           disabled={loading}
+          aria-label="Mensaje para el tutor IA"
         />
         <button type="submit" disabled={loading || !input.trim()}>
           <i className="fa-solid fa-paper-plane"></i>

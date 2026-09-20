@@ -4,11 +4,13 @@ import com.computaquest.exception.ResourceNotFoundException;
 import com.computaquest.model.User;
 import com.computaquest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -25,6 +27,7 @@ public class UserService {
             throw new ResourceNotFoundException("Usuario no encontrado");
         }
         userRepository.deleteById(id);
+        log.info("Usuario eliminado: {}", id);
     }
 
     private Map<String, Object> toPublicMap(User user) {
@@ -33,7 +36,7 @@ public class UserService {
         map.put("name", user.getName());
         map.put("email", user.getEmail());
         map.put("avatar", user.getAvatar());
-        map.put("role", user.getRole().getValue());
+        map.put("role", user.getRole() != null ? user.getRole().getValue() : null);
         map.put("level", user.getLevel());
         map.put("xp", user.getXp());
         map.put("points", user.getPoints());

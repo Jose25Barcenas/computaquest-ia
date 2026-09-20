@@ -12,6 +12,7 @@ import com.computaquest.repository.ChallengeRepository;
 import com.computaquest.repository.ProgressRepository;
 import com.computaquest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProgressService {
@@ -30,13 +32,14 @@ public class ProgressService {
     private final UserRepository userRepository;
 
     private static final int XP_PER_LEVEL = 500;
-    private static final int XP_CHALLENGE_PASS = 100;
     private static final int XP_CHALLENGE_FAIL = 50;
-    private static final int POINTS_CHALLENGE_PASS = 10;
     private static final int POINTS_CHALLENGE_FAIL = 5;
 
-    public List<ProgressDTO> getUserProgress(String userId) {
-        List<Progress> progressList = progressRepository.findByUser(userId);
+    public List<ProgressDTO> getUserProgress(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        List<Progress> progressList = progressRepository.findByUser(user.getId());
         if (progressList.isEmpty()) {
             return List.of();
         }
@@ -82,18 +85,20 @@ public class ProgressService {
             throw new ValidationAppException("Ya completaste este reto anteriormente");
         }
 
-        progress.setScore(request.getScore());
+        int clientScore = request.getScore();
+        int score = Math.min(Math.max(clientScore, 0), 100);
+        boolean passed = score >= 70;
+
+        progress.setScore(score);
         progress.setAttempts(progress.getAttempts() + 1);
         progress.setLastAttemptAt(Instant.now());
-
-        boolean passed = request.getScore() >= 70;
 
         if (passed) {
             progress.setCompleted(true);
             progress.setCompletedAt(Instant.now());
 
-            int xpReward = challenge.getXpReward() > 0 ? challenge.getXpReward() : XP_CHALLENGE_PASS;
-            int pointsReward = challenge.getPointsReward() > 0 ? challenge.getPointsReward() : POINTS_CHALLENGE_PASS;
+            int xpReward = challenge.getXpReward() > 0 ? challenge.getXpReward() : 100;
+            int pointsReward = challenge.getPointsReward() > 0 ? challenge.getPointsReward() : 10;
             user.setXp(user.getXp() + xpReward);
             user.setPoints(user.getPoints() + pointsReward);
 
@@ -101,20 +106,36 @@ public class ProgressService {
                 user.setBadges(new ArrayList<>(user.getBadges()));
                 user.getBadges().add(challenge.getBadgeName());
             }
+
+            log.info("Usuario {} completó reto '{}' con score {} (passed={})", userEmail, challenge.getTitle(), score, passed);
         } else {
             user.setXp(user.getXp() + XP_CHALLENGE_FAIL);
             user.setPoints(user.getPoints() + POINTS_CHALLENGE_FAIL);
+
+            log.info("Usuario {} intentó reto '{}' con score {} (passed={})", userEmail, challenge.getTitle(), score, passed);
         }
 
         while (user.getXp() >= XP_PER_LEVEL) {
             user.setXp(user.getXp() - XP_PER_LEVEL);
             user.setLevel(user.getLevel() + 1);
+            log.info("Usuario {} subió a nivel {}", userEmail, user.getLevel());
         }
 
         userRepository.save(user);
         progress = progressRepository.save(progress);
 
-        return toDTO(progress);
+        Challenge challengeRef = challenge;
+        return ProgressDTO.builder()
+                .id(progress.getId())
+                .challengeId(progress.getChallenge())
+                .challengeTitle(challengeRef.getTitle())
+                .challengeType(challengeRef.getType())
+                .challengeDifficulty(challengeRef.getDifficulty())
+                .completed(progress.getCompleted())
+                .score(progress.getScore())
+                .attempts(progress.getAttempts())
+                .completedAt(progress.getCompletedAt())
+                .build();
     }
 
     public List<LeaderboardEntry> getLeaderboard() {
@@ -138,21 +159,5 @@ public class ProgressService {
                     .build());
         }
         return leaderboard;
-    }
-
-    private ProgressDTO toDTO(Progress progress) {
-        Challenge challenge = challengeRepository.findById(progress.getChallenge()).orElse(null);
-
-        return ProgressDTO.builder()
-                .id(progress.getId())
-                .challengeId(progress.getChallenge())
-                .challengeTitle(challenge != null ? challenge.getTitle() : null)
-                .challengeType(challenge != null ? challenge.getType() : null)
-                .challengeDifficulty(challenge != null ? challenge.getDifficulty() : null)
-                .completed(progress.getCompleted())
-                .score(progress.getScore())
-                .attempts(progress.getAttempts())
-                .completedAt(progress.getCompletedAt())
-                .build();
     }
 }

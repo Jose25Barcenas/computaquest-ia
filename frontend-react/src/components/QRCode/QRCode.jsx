@@ -1,18 +1,24 @@
-/* eslint-env browser */
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 export default function QRCode({ url, size = 200, title = 'Escanea para acceder' }) {
   const [copied, setCopied] = useState(false)
+  const timerRef = useRef(null)
 
   const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&format=png&margin=10`
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(url)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Error al copiar:', err)
+      timerRef.current = setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // silent fail
     }
   }
 
@@ -20,12 +26,14 @@ export default function QRCode({ url, size = 200, title = 'Escanea para acceder'
     try {
       const response = await fetch(qrApiUrl)
       const blob = await response.blob()
+      const objectUrl = URL.createObjectURL(blob)
       const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
+      link.href = objectUrl
       link.download = 'computaquest-qr.png'
       link.click()
-    } catch (err) {
-      console.error('Error al descargar:', err)
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
+    } catch {
+      // silent fail
     }
   }
 

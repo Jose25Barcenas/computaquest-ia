@@ -7,6 +7,7 @@ import com.computaquest.model.User;
 import com.computaquest.repository.UserRepository;
 import com.computaquest.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -38,6 +40,7 @@ public class AuthService {
                 .build();
 
         user = userRepository.save(user);
+        log.info("Nuevo usuario registrado: {}", user.getEmail());
 
         String token = tokenProvider.generateToken(user.getEmail());
 
@@ -55,6 +58,8 @@ public class AuthService {
         user.setLastLoginDate(Instant.now());
         userRepository.save(user);
 
+        log.info("Login exitoso: {}", user.getEmail());
+
         String token = tokenProvider.generateToken(authentication);
 
         return buildAuthResponse(user, token);
@@ -66,15 +71,13 @@ public class AuthService {
     }
 
     public AuthResponse getCurrentUserResponse(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+        User user = getCurrentUser(email);
         String token = tokenProvider.generateToken(user.getEmail());
         return buildAuthResponse(user, token);
     }
 
     public AuthResponse updateProfile(String email, ProfileUpdateRequest request) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+        User user = getCurrentUser(email);
 
         if (request.getName() != null) {
             user.setName(request.getName());
@@ -84,6 +87,7 @@ public class AuthService {
         }
 
         user = userRepository.save(user);
+        log.info("Perfil actualizado: {}", email);
 
         String token = tokenProvider.generateToken(user.getEmail());
         return buildAuthResponse(user, token);

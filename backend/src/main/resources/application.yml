@@ -10,7 +10,7 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:computaquest-dev-secret-minimum-32-characters-long}
+    secret: ${JWT_SECRET:computaquest-dev-secret-change-in-production-minimum-32-chars}
     expiration: ${JWT_EXPIRATION_MS:604800000}
   openai:
     api-key: ${OPENAI_API_KEY:NOT_CONFIGURED}
@@ -19,3 +19,8 @@ app:
     temperature: 0.7
   cors:
     allowed-origins: ${FRONTEND_URL:http://localhost:3000,https://splendorous-pavlova-8f20fb.netlify.app}
+
+logging:
+  level:
+    root: INFO
+    com.computaquest: INFO

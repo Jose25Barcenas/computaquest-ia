@@ -1,5 +1,6 @@
 package com.computaquest.dto;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,5 +14,6 @@ public class CompleteChallengeRequest {
 
     @NotNull(message = "El score es requerido")
     @Min(value = 0, message = "El score no puede ser negativo")
+    @Max(value = 100, message = "El score no puede ser mayor a 100")
     private Integer score;
 }
