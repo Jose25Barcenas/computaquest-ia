@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@Profile("!prod")
+@Profile("!test")
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
