@@ -10,7 +10,7 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET}
+    secret: ${JWT_SECRET:computaquest-dev-secret-minimum-32-characters-long}
     expiration: ${JWT_EXPIRATION_MS:604800000}
   openai:
     api-key: ${OPENAI_API_KEY:NOT_CONFIGURED}
