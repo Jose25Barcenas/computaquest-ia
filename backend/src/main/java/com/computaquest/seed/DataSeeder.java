@@ -30,7 +30,7 @@ public class DataSeeder implements CommandLineRunner {
     @Value("${ADMIN_EMAIL:admin@computaquest.com}")
     private String adminEmail;
 
-    @Value("${ADMIN_PASSWORD}")
+    @Value("${ADMIN_PASSWORD:admin123}")
     private String adminPassword;
 
     @Override
@@ -40,6 +40,15 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedAdmin() {
+        // Fix existing admin with wrong role
+        userRepository.findByEmail(adminEmail).ifPresent(existing -> {
+            if (existing.getRole() != Role.ADMIN) {
+                existing.setRole(Role.ADMIN);
+                userRepository.save(existing);
+                log.info("Rol de admin corregido a ADMIN");
+            }
+        });
+
         if (!userRepository.existsByEmail(adminEmail)) {
             User admin = User.builder()
                     .name("Administrador")
