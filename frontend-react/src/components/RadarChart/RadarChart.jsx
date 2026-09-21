@@ -1,11 +1,13 @@
 import { useMemo, useRef } from 'react'
 import { Radar } from 'react-chartjs-2'
 import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js'
+import { useTheme } from '../../context/ThemeContext'
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
 export default function RadarChart({ progress = [] }) {
   const chartRef = useRef(null)
+  const { theme } = useTheme()
 
   const scores = useMemo(() => {
     const skills = {
@@ -33,7 +35,7 @@ export default function RadarChart({ progress = [] }) {
     ]
   }, [progress])
 
-  const isDark = document.documentElement.getAttribute('data-theme') !== 'light'
+  const isDark = theme === 'dark'
   const labelColor = isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'
   const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
   const tickColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'

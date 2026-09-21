@@ -1,5 +1,6 @@
 package com.computaquest.service;
 
+import com.computaquest.dto.UserDTO;
 import com.computaquest.exception.ResourceNotFoundException;
 import com.computaquest.model.User;
 import com.computaquest.repository.UserRepository;
@@ -8,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -17,9 +17,9 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public List<Map<String, Object>> getAllUsers() {
+    public List<UserDTO> getAllUsers() {
         List<User> users = userRepository.findAll();
-        return users.stream().map(this::toPublicMap).toList();
+        return users.stream().map(this::toDTO).toList();
     }
 
     public void deleteUser(String id) {
@@ -30,19 +30,19 @@ public class UserService {
         log.info("Usuario eliminado: {}", id);
     }
 
-    private Map<String, Object> toPublicMap(User user) {
-        Map<String, Object> map = new java.util.HashMap<>();
-        map.put("_id", user.getId());
-        map.put("name", user.getName());
-        map.put("email", user.getEmail());
-        map.put("avatar", user.getAvatar());
-        map.put("role", user.getRole() != null ? user.getRole().getValue() : null);
-        map.put("level", user.getLevel());
-        map.put("xp", user.getXp());
-        map.put("points", user.getPoints());
-        map.put("streak", user.getStreak());
-        map.put("badges", user.getBadges());
-        map.put("createdAt", user.getCreatedAt());
-        return map;
+    private UserDTO toDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .avatar(user.getAvatar())
+                .role(user.getRole())
+                .level(user.getLevel())
+                .xp(user.getXp())
+                .points(user.getPoints())
+                .streak(user.getStreak())
+                .badges(user.getBadges())
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 }

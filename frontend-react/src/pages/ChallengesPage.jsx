@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useToast } from '../context/ToastContext'
 import api from '../services/api'
 import Leaderboard from '../components/Leaderboard/Leaderboard'
+import { TYPE_INFO } from '../constants'
 
 export default function ChallengesPage() {
   const [challenges, setChallenges] = useState([])
@@ -28,13 +29,6 @@ export default function ChallengesPage() {
     }
   }
 
-  const typeInfo = {
-    decomposition: { icon: 'fa-puzzle-piece', color: '#6366f1', label: 'Descomposicion' },
-    patterns: { icon: 'fa-magnifying-glass', color: '#10b981', label: 'Patrones' },
-    abstraction: { icon: 'fa-filter', color: '#f59e0b', label: 'Abstraccion' },
-    algorithms: { icon: 'fa-code', color: '#ef4444', label: 'Algoritmos' },
-  }
-
   const difficultyStars = (n) => {
     return Array.from({ length: 5 }, (_, i) => (
       <i key={i} className={`fa-solid fa-star ${i < n ? 'active' : ''}`}></i>
@@ -45,7 +39,7 @@ export default function ChallengesPage() {
     <div className="challenges-container">
       <h1 className="page-title">
         <i className="fa-solid fa-gamepad"></i>
-        {typeFilter ? typeInfo[typeFilter]?.label || 'Retos' : 'Todos los Retos'}
+        {typeFilter ? TYPE_INFO[typeFilter]?.label || 'Retos' : 'Todos los Retos'}
       </h1>
 
       {typeFilter && (
@@ -61,7 +55,7 @@ export default function ChallengesPage() {
           ) : (
             <>
               {challenges.map(challenge => {
-            const info = typeInfo[challenge.type] || {}
+            const info = TYPE_INFO[challenge.type] || {}
             return (
               <Link
                 key={challenge.id}

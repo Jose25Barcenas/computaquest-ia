@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import api from '../services/api'
 import RadarChart from '../components/RadarChart/RadarChart'
+import { MODULES } from '../constants'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -27,13 +28,6 @@ export default function DashboardPage() {
       toast.error('Error al cargar datos del dashboard')
     }
   }
-
-  const modules = [
-    { id: 'DECOMPOSITION', icon: 'fa-puzzle-piece', title: 'Descomposicion', color: '#6366f1' },
-    { id: 'PATTERNS', icon: 'fa-magnifying-glass', title: 'Reconocimiento de Patrones', color: '#10b981' },
-    { id: 'ABSTRACTION', icon: 'fa-filter', title: 'Abstraccion', color: '#f59e0b' },
-    { id: 'ALGORITHMS', icon: 'fa-code', title: 'Arquitectura de Algoritmos', color: '#ef4444' },
-  ]
 
   const completedCount = progress.filter(p => p.completed).length
 
@@ -95,7 +89,7 @@ export default function DashboardPage() {
             <h3><i className="fa-solid fa-gamepad"></i> Modulos de Aprendizaje</h3>
             <p className="modules-subtitle">Progreso: {completedCount} retos completados</p>
             <div className="modules-grid">
-              {modules.map(mod => (
+              {MODULES.map(mod => (
                 <Link
                   key={mod.id}
                   to={`/challenges?type=${mod.id}`}
@@ -103,7 +97,7 @@ export default function DashboardPage() {
                   style={{ '--module-color': mod.color }}
                 >
                   <i className={`fa-solid ${mod.icon}`}></i>
-                  <span>{mod.title}</span>
+                  <span>{mod.label}</span>
                 </Link>
               ))}
             </div>

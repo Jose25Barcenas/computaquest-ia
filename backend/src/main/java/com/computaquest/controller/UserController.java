@@ -1,5 +1,6 @@
 package com.computaquest.controller;
 
+import com.computaquest.dto.UserDTO;
 import com.computaquest.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -21,8 +22,8 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Listar usuarios", description = "Obtiene todos los usuarios (solo Admin)")
-    public ResponseEntity<Map<String, Object>> getAllUsers() {
-        return ResponseEntity.ok(Map.of("users", userService.getAllUsers()));
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @DeleteMapping("/{id}")

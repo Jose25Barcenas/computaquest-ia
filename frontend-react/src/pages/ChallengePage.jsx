@@ -7,6 +7,7 @@ import DragDrop from '../components/ChallengeTypes/DragDrop'
 import Quiz from '../components/ChallengeTypes/Quiz'
 import MultipleSelect from '../components/ChallengeTypes/MultipleSelect'
 import Chat from '../components/Chat/Chat'
+import { TYPE_INFO } from '../constants'
 
 export default function ChallengePage() {
   const { id } = useParams()
@@ -76,13 +77,10 @@ export default function ChallengePage() {
     }
   }
 
-  const typeInfo = {
-    decomposition: { icon: 'fa-puzzle-piece', color: '#6366f1', label: 'Descomposicion' },
-    patterns: { icon: 'fa-magnifying-glass', color: '#10b981', label: 'Patrones' },
-    abstraction: { icon: 'fa-filter', color: '#f59e0b', label: 'Abstraccion' },
-    algorithms: { icon: 'fa-code', color: '#ef4444', label: 'Algoritmos' },
-  }
-  const info = typeInfo[challenge.type] || {}
+  const xpEarned = result?.score >= 70 ? (challenge?.xpReward || 100) : Math.floor((challenge?.xpReward || 100) / 2)
+  const ptsEarned = result?.score >= 70 ? (challenge?.pointsReward || 10) : Math.floor((challenge?.pointsReward || 10) / 2)
+
+  const info = TYPE_INFO[challenge.type] || {}
 
   return (
     <div className="challenge-page-container">
@@ -118,7 +116,7 @@ export default function ChallengePage() {
             <i className="fa-solid fa-circle-check"></i>
             <h2>¡Reto Completado!</h2>
             <p>Puntuacion: {result?.score || 0}%</p>
-            <p>+{result?.score >= 70 ? `${challenge?.xpReward || 100} XP, ${challenge?.pointsReward || 10} pts` : `${Math.floor((challenge?.xpReward || 100) / 2)} XP, ${Math.floor((challenge?.pointsReward || 10) / 2)} pts`}</p>
+            <p>+{xpEarned} XP, +{ptsEarned} pts</p>
             <button className="btn-primary" onClick={() => navigate('/challenges')}>
               <i className="fa-solid fa-gamepad"></i> Seguir Jugando
             </button>
