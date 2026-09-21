@@ -3,13 +3,21 @@ import { useState } from 'react'
 export default function DragDrop({ content, onComplete }) {
   const [items, setItems] = useState(() => {
     if (!content?.items) return []
-    return [...content.items].sort(() => Math.random() - 0.5)
+    const shuffled = [...content.items]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
   })
   const [draggedItem, setDraggedItem] = useState(null)
 
   const handleDragStart = (e, item) => {
     setDraggedItem(item)
     e.dataTransfer.effectAllowed = 'move'
+    if (e.dataTransfer.setData) {
+      e.dataTransfer.setData('text/plain', item.id)
+    }
   }
 
   const handleDragOver = (e, index) => {
@@ -32,6 +40,28 @@ export default function DragDrop({ content, onComplete }) {
     setDraggedItem(null)
   }
 
+  const handleTouchStart = (e, item) => {
+    setDraggedItem(item)
+  }
+
+  const handleTouchEnd = (e, index) => {
+    if (!draggedItem) return
+    const touch = e.changedTouches[0]
+    const target = document.elementFromPoint(touch.clientX, touch.clientY)
+    const dropTarget = target?.closest('.drag-item')
+    if (dropTarget) {
+      const dropIndex = parseInt(dropTarget.dataset.index, 10)
+      if (!isNaN(dropIndex)) {
+        const newItems = [...items]
+        const dragIdx = newItems.findIndex(i => i.id === draggedItem.id)
+        newItems.splice(dragIdx, 1)
+        newItems.splice(dropIndex, 0, draggedItem)
+        setItems(newItems)
+      }
+    }
+    setDraggedItem(null)
+  }
+
   const handleCheck = () => {
     const correctOrder = content?.correctOrder || []
     const userOrder = items.map(i => i.id)
@@ -49,11 +79,14 @@ export default function DragDrop({ content, onComplete }) {
         {items.map((item, index) => (
           <div
             key={item.id}
+            data-index={index}
             className={`drag-item ${draggedItem?.id === item.id ? 'dragging' : ''}`}
             draggable
             onDragStart={(e) => handleDragStart(e, item)}
             onDragOver={(e) => handleDragOver(e, index)}
             onDrop={(e) => handleDrop(e, index)}
+            onTouchStart={(e) => handleTouchStart(e, item)}
+            onTouchEnd={(e) => handleTouchEnd(e, index)}
           >
             <span className="drag-number">{index + 1}</span>
             <span className="drag-text">{item.text}</span>

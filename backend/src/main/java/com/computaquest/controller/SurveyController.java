@@ -40,11 +40,13 @@ public class SurveyController {
     }
 
     @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> getStats(@RequestParam String type) {
         return ResponseEntity.ok(surveyService.getSurveyStats(type));
     }
 
     @GetMapping("/stats/{demographic}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> getStatsByDemographic(
             @PathVariable String demographic,
             @RequestParam String type) {

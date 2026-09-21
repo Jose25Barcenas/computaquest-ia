@@ -3,17 +3,23 @@ import { describe, it, expect, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import Leaderboard from '../components/Leaderboard/Leaderboard'
 import { AuthProvider } from '../context/AuthContext'
+import { ToastProvider } from '../context/ToastContext'
 
 vi.mock('../services/api', () => ({
-  default: { getLeaderboard: vi.fn().mockResolvedValue([]) },
+  default: {
+    getLeaderboard: vi.fn().mockResolvedValue([]),
+    getMe: vi.fn().mockRejectedValue(new Error('Not logged in')),
+  },
 }))
 
 function renderLeaderboard() {
   return render(
     <MemoryRouter>
-      <AuthProvider>
-        <Leaderboard />
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <Leaderboard />
+        </AuthProvider>
+      </ToastProvider>
     </MemoryRouter>
   )
 }

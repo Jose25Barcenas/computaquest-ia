@@ -29,5 +29,7 @@ public class ChallengeCreateRequest {
     @NotNull(message = "El contenido es requerido")
     private Map<String, Object> content;
 
+    private Boolean isActive;
+
     private Integer order;
 }

@@ -28,6 +28,13 @@ function PublicRoute({ children }) {
   return children
 }
 
+function NotFoundRoute() {
+  const { user, loading } = useAuth()
+
+  if (loading) return <div className="loading-screen"><div className="spinner"></div></div>
+  return <Navigate to={user ? '/dashboard' : '/'} />
+}
+
 export default function App() {
   return (
     <>
@@ -41,7 +48,7 @@ export default function App() {
           <Route path="/challenge/:id" element={<ProtectedRoute><ChallengePage /></ProtectedRoute>} />
           <Route path="/survey" element={<ProtectedRoute><SurveyPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><AdminPage /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<NotFoundRoute />} />
         </Routes>
       </main>
     </>

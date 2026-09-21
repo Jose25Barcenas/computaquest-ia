@@ -6,6 +6,7 @@ import Leaderboard from '../components/Leaderboard/Leaderboard'
 
 export default function ChallengesPage() {
   const [challenges, setChallenges] = useState([])
+  const [loading, setLoading] = useState(true)
   const [searchParams, setSearchParams] = useSearchParams()
   const typeFilter = searchParams.get('type')
   const toast = useToast()
@@ -15,12 +16,15 @@ export default function ChallengesPage() {
   }, [typeFilter])
 
   const loadChallenges = async () => {
+    setLoading(true)
     try {
       const params = typeFilter ? { type: typeFilter } : {}
       const data = await api.getChallenges(params)
       setChallenges(data)
     } catch (error) {
       toast.error('Error al cargar retos')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -52,7 +56,11 @@ export default function ChallengesPage() {
 
       <div className="challenges-layout">
         <div className="challenges-grid">
-          {challenges.map(challenge => {
+          {loading ? (
+            <div className="loading-screen"><div className="spinner"></div></div>
+          ) : (
+            <>
+              {challenges.map(challenge => {
             const info = typeInfo[challenge.type] || {}
             return (
               <Link
@@ -87,11 +95,13 @@ export default function ChallengesPage() {
             )
           })}
 
-          {challenges.length === 0 && (
-            <div className="challenges-empty">
-              <i className="fa-solid fa-gamepad"></i>
-              <p>No hay retos disponibles</p>
-            </div>
+              {challenges.length === 0 && (
+                <div className="challenges-empty">
+                  <i className="fa-solid fa-gamepad"></i>
+                  <p>No hay retos disponibles</p>
+                </div>
+              )}
+            </>
           )}
         </div>
 

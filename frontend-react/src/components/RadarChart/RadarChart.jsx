@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { Radar } from 'react-chartjs-2'
 import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js'
 
@@ -7,7 +7,7 @@ ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, 
 export default function RadarChart({ progress = [] }) {
   const chartRef = useRef(null)
 
-  const getSkillScores = () => {
+  const scores = useMemo(() => {
     const skills = {
       decomposition: { total: 0, completed: 0 },
       patterns: { total: 0, completed: 0 },
@@ -31,11 +31,14 @@ export default function RadarChart({ progress = [] }) {
       skills.abstraction.total > 0 ? (skills.abstraction.completed / skills.abstraction.total) * 100 : 0,
       skills.algorithms.total > 0 ? (skills.algorithms.completed / skills.algorithms.total) * 100 : 0,
     ]
-  }
+  }, [progress])
 
-  const scores = getSkillScores()
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light'
+  const labelColor = isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.7)'
+  const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+  const tickColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'
 
-  const data = {
+  const data = useMemo(() => ({
     labels: ['Descomposicion', 'Patrones', 'Abstraccion', 'Algoritmos'],
     datasets: [{
       label: 'Habilidades',
@@ -44,13 +47,13 @@ export default function RadarChart({ progress = [] }) {
       borderColor: 'rgba(99, 102, 241, 0.8)',
       borderWidth: 2,
       pointBackgroundColor: 'rgba(99, 102, 241, 1)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
+      pointBorderColor: isDark ? '#fff' : '#333',
+      pointHoverBackgroundColor: isDark ? '#fff' : '#333',
       pointHoverBorderColor: 'rgba(99, 102, 241, 1)',
     }]
-  }
+  }), [scores, isDark])
 
-  const options = {
+  const options = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     scales: {
@@ -59,13 +62,13 @@ export default function RadarChart({ progress = [] }) {
         max: 100,
         ticks: {
           stepSize: 20,
-          color: 'rgba(255,255,255,0.5)',
+          color: tickColor,
           backdropColor: 'transparent',
         },
-        grid: { color: 'rgba(255,255,255,0.1)' },
-        angleLines: { color: 'rgba(255,255,255,0.1)' },
+        grid: { color: gridColor },
+        angleLines: { color: gridColor },
         pointLabels: {
-          color: 'rgba(255,255,255,0.8)',
+          color: labelColor,
           font: { size: 11 },
         },
       },
@@ -73,7 +76,7 @@ export default function RadarChart({ progress = [] }) {
     plugins: {
       legend: { display: false },
     },
-  }
+  }), [labelColor, gridColor, tickColor])
 
   return (
     <div className="radar-chart-container">

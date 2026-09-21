@@ -150,7 +150,7 @@ public class ChatService {
             return "Lo siento, no pude procesar tu mensaje en este momento. Intenta de nuevo.";
 
         } catch (Exception e) {
-            log.error("Error al llamar a OpenAI API: {}", e.getMessage());
+            log.error("Error al llamar a OpenAI API: {}", e.getMessage(), e);
             return "Lo siento, el tutor IA no está disponible en este momento. Por favor, intenta más tarde.";
         }
     }

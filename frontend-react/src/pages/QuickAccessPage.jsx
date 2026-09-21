@@ -1,10 +1,7 @@
 import QRCode from '../components/QRCode/QRCode'
 
 function getAppUrl() {
-  const { hostname, origin } = window.location
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return origin.replace(/localhost|127\.0\.0\.1/, '192.168.1.10')
-  }
+  const { origin } = window.location
   return origin
 }
 

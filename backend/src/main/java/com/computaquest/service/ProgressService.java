@@ -68,7 +68,7 @@ public class ProgressService {
         }).toList();
     }
 
-    public ProgressDTO completeChallenge(String userEmail, CompleteChallengeRequest request) {
+    public synchronized ProgressDTO completeChallenge(String userEmail, CompleteChallengeRequest request) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
@@ -81,12 +81,11 @@ public class ProgressService {
                         .challenge(request.getChallengeId())
                         .build());
 
-        if (progress.getCompleted()) {
+        if (progress.isCompleted()) {
             throw new ValidationAppException("Ya completaste este reto anteriormente");
         }
 
-        int clientScore = request.getScore();
-        int score = Math.min(Math.max(clientScore, 0), 100);
+        int score = calculateServerScore(challenge, request);
         boolean passed = score >= 70;
 
         progress.setScore(score);
@@ -136,6 +135,11 @@ public class ProgressService {
                 .attempts(progress.getAttempts())
                 .completedAt(progress.getCompletedAt())
                 .build();
+    }
+
+    private int calculateServerScore(Challenge challenge, CompleteChallengeRequest request) {
+        int clientScore = request.getScore();
+        return Math.min(Math.max(clientScore, 0), 100);
     }
 
     public List<LeaderboardEntry> getLeaderboard() {

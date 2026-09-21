@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -72,6 +73,7 @@ class ChallengeControllerUnitTest {
 
     @Test
     void deleteChallengeReturns204() throws Exception {
+        doNothing().when(challengeService).deleteChallenge("1");
         mockMvc.perform(delete("/api/challenges/1"))
                 .andExpect(status().isNoContent());
     }

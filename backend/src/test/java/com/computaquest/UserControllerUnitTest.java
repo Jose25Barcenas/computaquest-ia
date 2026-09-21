@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -48,6 +49,7 @@ class UserControllerUnitTest {
 
     @Test
     void deleteUserReturns204() throws Exception {
+        doNothing().when(userService).deleteUser("1");
         mockMvc.perform(delete("/api/users/1"))
                 .andExpect(status().isNoContent());
     }

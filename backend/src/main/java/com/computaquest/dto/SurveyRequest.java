@@ -28,5 +28,6 @@ public class SurveyRequest {
 
     // Respuestas Likert (1-5)
     @NotNull(message = "Las respuestas son requeridas")
+    @Valid
     private Map<Integer, Integer> answers;
 }

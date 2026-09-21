@@ -29,7 +29,7 @@ public class Progress {
     private String challenge;
 
     @Builder.Default
-    private Boolean completed = false;
+    private boolean completed = false;
 
     @Builder.Default
     private Integer score = 0;

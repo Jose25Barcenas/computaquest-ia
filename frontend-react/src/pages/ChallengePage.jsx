@@ -127,7 +127,7 @@ export default function ChallengePage() {
       </div>
 
       <div className="challenge-sidebar">
-        <Chat user={user} />
+        <Chat />
       </div>
     </div>
   )

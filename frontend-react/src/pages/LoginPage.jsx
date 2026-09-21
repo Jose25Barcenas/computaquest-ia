@@ -177,7 +177,7 @@ export default function LoginPage() {
                 {loading ? <i className="fa-solid fa-spinner fa-spin"></i> : 'Crear Cuenta'}
               </button>
               <p className="auth-switch">
-                ¿Ya tienes cuenta? <a onClick={() => switchMode(true)}>Iniciar Sesion</a>
+                ¿Ya tienes cuenta? <a href="#" role="button" onClick={(e) => { e.preventDefault(); switchMode(true) }}>Iniciar Sesion</a>
               </p>
             </form>
           </div>
@@ -213,7 +213,7 @@ export default function LoginPage() {
                 {loading ? <i className="fa-solid fa-spinner fa-spin"></i> : 'Entrar al Mundo Virtual'}
               </button>
               <p className="auth-switch">
-                ¿No tienes cuenta? <a onClick={() => switchMode(false)}>Registrate</a>
+                ¿No tienes cuenta? <a href="#" role="button" onClick={(e) => { e.preventDefault(); switchMode(false) }}>Registrate</a>
               </p>
             </form>
           </div>

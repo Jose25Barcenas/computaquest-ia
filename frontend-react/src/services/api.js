@@ -40,7 +40,7 @@ async function request(endpoint, options = {}) {
 const api = {
   register: (data) => request('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
   login: (data) => request('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
-  getMe: () => request('/auth/me'),
+  getMe: (options = {}) => request('/auth/me', options),
   updateProfile: (data) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
 
   getChallenges: (params = {}) => {

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.Map;
 
 @Data
@@ -25,5 +26,5 @@ public class SurveyDTO {
     private Map<String, Double> dimensionScores;
 
     // Metadata
-    private String createdAt;
+    private Instant createdAt;
 }

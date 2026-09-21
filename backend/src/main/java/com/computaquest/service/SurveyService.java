@@ -7,7 +7,6 @@ import com.computaquest.repository.SurveyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -274,9 +273,7 @@ public class SurveyService {
                 .answers(survey.getAnswers())
                 .totalScore(survey.getTotalScore())
                 .dimensionScores(survey.getDimensionScores())
-                .createdAt(survey.getCreatedAt() != null
-                        ? survey.getCreatedAt().atZone(ZoneId.systemDefault()).toString()
-                        : null)
+                .createdAt(survey.getCreatedAt())
                 .build();
     }
 }

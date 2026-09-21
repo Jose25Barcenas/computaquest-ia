@@ -18,6 +18,7 @@ export default function AdminPage() {
     xpReward: 100,
     pointsReward: 10,
     badgeName: '',
+    content: {},
   })
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function AdminPage() {
     if (!confirm('¿Eliminar este usuario?')) return
     try {
       await api.deleteUser(id)
-      setUsers(prev => prev.filter(u => u._id !== id))
+      setUsers(prev => prev.filter(u => u.id !== id))
       toast.success('Usuario eliminado')
     } catch (error) {
       toast.error('Error al eliminar usuario')
@@ -70,7 +71,7 @@ export default function AdminPage() {
       setChallenges(prev => [...prev, data])
       setNewChallenge({
         title: '', description: '', type: 'decomposition',
-        difficulty: 1, xpReward: 100, pointsReward: 10, badgeName: '',
+        difficulty: 1, xpReward: 100, pointsReward: 10, badgeName: '', content: {},
       })
       toast.success('Reto creado exitosamente')
     } catch (error) {
@@ -112,7 +113,7 @@ export default function AdminPage() {
             </thead>
             <tbody>
               {users.map(user => (
-                <tr key={user._id}>
+                <tr key={user.id}>
                   <td><img src={`https://api.dicebear.com/7.x/bottts/svg?seed=${user.avatar}`} alt="" className="table-avatar" /></td>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
@@ -120,7 +121,7 @@ export default function AdminPage() {
                   <td>{user.level}</td>
                   <td>{user.points}</td>
                   <td>
-                    <button className="btn-danger btn-sm" onClick={() => handleDeleteUser(user._id)}>
+                    <button className="btn-danger btn-sm" onClick={() => handleDeleteUser(user.id)}>
                       <i className="fa-solid fa-trash"></i>
                     </button>
                   </td>
