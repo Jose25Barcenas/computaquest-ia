@@ -42,6 +42,9 @@ const api = {
   login: (data) => request('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
   getMe: (options = {}) => request('/auth/me', options),
   updateProfile: (data) => request('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
+  forgotPassword: (data) => request('/auth/forgot-password', { method: 'POST', body: JSON.stringify(data) }),
+  resetPassword: (data) => request('/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
+  changePassword: (data) => request('/auth/change-password', { method: 'POST', body: JSON.stringify(data) }),
 
   getChallenges: (params = {}) => {
     const query = new URLSearchParams(params).toString()

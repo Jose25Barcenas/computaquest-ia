@@ -59,6 +59,10 @@ public class User implements UserDetails {
 
     private Instant lastLoginDate;
 
+    private String resetToken;
+
+    private Instant resetTokenExpiry;
+
     @Builder.Default
     private List<String> badges = List.of();
 

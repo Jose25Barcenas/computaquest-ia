@@ -45,4 +45,30 @@ public class AuthController {
             @Valid @RequestBody ProfileUpdateRequest request) {
         return ResponseEntity.ok(authService.updateProfile(authentication.getName(), request));
     }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Olvide mi contrasena", description = "Genera un token de restablecimiento para el email proporcionado")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        String token = authService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok(Map.of(
+                "message", "Token de restablecimiento generado",
+                "token", token
+        ));
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Restablecer contrasena", description = "Restablece la contrasena usando un token valido")
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(Map.of("message", "Contrasena restablecida exitosamente"));
+    }
+
+    @PostMapping("/change-password")
+    @Operation(summary = "Cambiar contrasena", description = "Cambia la contrasena del usuario autenticado")
+    public ResponseEntity<Map<String, String>> changePassword(
+            Authentication authentication,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(authentication.getName(), request);
+        return ResponseEntity.ok(Map.of("message", "Contrasena cambiada exitosamente"));
+    }
 }
