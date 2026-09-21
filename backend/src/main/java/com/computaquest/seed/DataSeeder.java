@@ -27,10 +27,10 @@ public class DataSeeder implements CommandLineRunner {
     private final ChallengeRepository challengeRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${admin.email:admin@computaquest.com}")
+    @Value("${ADMIN_EMAIL:admin@computaquest.com}")
     private String adminEmail;
 
-    @Value("${admin.password:admin123}")
+    @Value("${ADMIN_PASSWORD}")
     private String adminPassword;
 
     @Override

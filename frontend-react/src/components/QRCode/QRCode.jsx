@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 
 export default function QRCode({ url, size = 200, title = 'Escanea para acceder' }) {
   const [copied, setCopied] = useState(false)
+  const [imgError, setImgError] = useState(false)
   const timerRef = useRef(null)
 
   const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&format=png&margin=10`
@@ -18,7 +19,14 @@ export default function QRCode({ url, size = 200, title = 'Escanea para acceder'
       setCopied(true)
       timerRef.current = setTimeout(() => setCopied(false), 2000)
     } catch {
-      // silent fail
+      const textarea = document.createElement('textarea')
+      textarea.value = url
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+      setCopied(true)
+      timerRef.current = setTimeout(() => setCopied(false), 2000)
     }
   }
 
@@ -33,7 +41,11 @@ export default function QRCode({ url, size = 200, title = 'Escanea para acceder'
       link.click()
       setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
     } catch {
-      // silent fail
+      const link = document.createElement('a')
+      link.href = qrApiUrl
+      link.target = '_blank'
+      link.download = 'computaquest-qr.png'
+      link.click()
     }
   }
 
@@ -41,13 +53,21 @@ export default function QRCode({ url, size = 200, title = 'Escanea para acceder'
     <div className="qr-container glass-panel">
       {title && <h3 className="qr-title">{title}</h3>}
       <div className="qr-image-wrapper">
-        <img 
-          src={qrApiUrl} 
-          alt="Código QR de acceso a ComputaQuest" 
-          className="qr-image"
-          width={size}
-          height={size}
-        />
+        {imgError ? (
+          <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0', borderRadius: 8, flexDirection: 'column', gap: 8 }}>
+            <i className="fa-solid fa-qrcode" style={{ fontSize: 48, color: '#6366f1' }}></i>
+            <span style={{ fontSize: 12, color: '#666' }}>{url}</span>
+          </div>
+        ) : (
+          <img
+            src={qrApiUrl}
+            alt="Código QR de acceso a ComputaQuest"
+            className="qr-image"
+            width={size}
+            height={size}
+            onError={() => setImgError(true)}
+          />
+        )}
       </div>
       <p className="qr-url">{url}</p>
       <div className="qr-actions">
