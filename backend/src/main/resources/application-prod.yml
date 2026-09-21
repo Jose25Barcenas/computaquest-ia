@@ -9,6 +9,7 @@ spring:
 management:
   endpoints:
     web:
+      base-path: /actuator
       exposure:
         include: health,info
   endpoint:
@@ -19,3 +20,4 @@ logging:
   level:
     root: WARN
     com.computaquest: INFO
+    org.springframework.security: WARN

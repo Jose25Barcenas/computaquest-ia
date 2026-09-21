@@ -1,6 +1,7 @@
 package com.computaquest.service;
 
 import com.computaquest.dto.*;
+import com.computaquest.enums.Role;
 import com.computaquest.exception.ResourceNotFoundException;
 import com.computaquest.exception.ValidationAppException;
 import com.computaquest.model.User;
@@ -8,6 +9,7 @@ import com.computaquest.repository.UserRepository;
 import com.computaquest.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,10 +29,15 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
 
+    @Value("${ADMIN_EMAIL:admin@computaquest.com}")
+    private String adminEmail;
+
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ValidationAppException("Ya existe una cuenta con este email");
         }
+
+        Role assignedRole = request.getEmail().equalsIgnoreCase(adminEmail) ? Role.ADMIN : Role.STUDENT;
 
         User user = User.builder()
                 .name(request.getName())
@@ -38,10 +45,11 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .avatar(request.getAvatar() != null ? request.getAvatar() : "avatar1")
                 .grade(request.getGrade())
+                .role(assignedRole)
                 .build();
 
         user = userRepository.save(user);
-        log.info("Nuevo usuario registrado: {}", user.getEmail());
+        log.info("Nuevo usuario registrado: {} con rol: {}", user.getEmail(), assignedRole);
 
         String token = tokenProvider.generateToken(user.getEmail());
 

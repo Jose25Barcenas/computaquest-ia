@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -28,33 +29,53 @@ public class HealthController {
     @Value("${app.seed.key:}")
     private String seedKey;
 
+    @Value("${ADMIN_EMAIL:admin@computaquest.com}")
+    private String adminEmail;
+
     @GetMapping("/api/health")
     public ResponseEntity<Map<String, Object>> health() {
         Map<String, Object> result = new HashMap<>();
-        result.put("status", "OK");
-        result.put("timestamp", java.time.Instant.now().toString());
-        result.put("challengesCount", challengeRepository.count());
+        try {
+            long challengesCount = challengeRepository.count();
+            result.put("status", "OK");
+            result.put("timestamp", java.time.Instant.now().toString());
+            result.put("challengesCount", challengesCount);
+            result.put("usersCount", userRepository.count());
+        } catch (Exception e) {
+            log.error("Error in health check: {}", e.getMessage());
+            result.put("status", "ERROR");
+            result.put("error", "MongoDB no conectado: " + e.getMessage());
+        }
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/api/health/seed")
-    public ResponseEntity<Map<String, Object>> seed() {
+    public ResponseEntity<Map<String, Object>> seed(
+            @RequestHeader(value = "X-Seed-Key", required = false) String providedKey) {
         Map<String, Object> result = new HashMap<>();
 
+        if (seedKey != null && !seedKey.isEmpty()) {
+            if (providedKey == null || !providedKey.equals(seedKey)) {
+                result.put("status", "FORBIDDEN");
+                result.put("message", "Seed key invalida. Envia header X-Seed-Key");
+                return ResponseEntity.status(403).body(result);
+            }
+        }
+
         try {
-            var adminOpt = userRepository.findByEmail("admin@computaquest.com");
+            var adminOpt = userRepository.findByEmail(adminEmail);
             if (adminOpt.isPresent()) {
                 User admin = adminOpt.get();
                 if (admin.getRole() != Role.ADMIN) {
                     admin.setRole(Role.ADMIN);
                     userRepository.save(admin);
                     result.put("adminFixed", true);
-                    log.info("Admin role fixed to ADMIN");
+                    log.info("Admin role fixed to ADMIN for: {}", adminEmail);
                 } else {
                     result.put("adminFixed", "already ADMIN");
                 }
             } else {
-                result.put("adminFixed", "admin not found");
+                result.put("adminFixed", "admin not found with email: " + adminEmail);
             }
         } catch (Exception e) {
             result.put("adminError", e.getMessage());
@@ -102,6 +123,7 @@ public class HealthController {
                         "items", List.of(Map.of("id","1","text","Recibir datos del usuario"), Map.of("id","2","text","Validar la informacion"), Map.of("id","3","text","Procesar los datos"), Map.of("id","4","text","Guardar resultado"), Map.of("id","5","text","Mostrar respuesta")),
                         "correctOrder", List.of("1","2","3","4","5")));
                 result.put("challengesCreated", 4);
+                log.info("4 challenges seeded successfully");
             } catch (Exception e) {
                 result.put("seedError", e.getMessage());
                 log.error("Error seeding challenges: {}", e.getMessage(), e);
