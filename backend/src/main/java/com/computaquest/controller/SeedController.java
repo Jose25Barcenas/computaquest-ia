@@ -24,29 +24,37 @@ public class SeedController {
     private final UserRepository userRepository;
     private final ChallengeRepository challengeRepository;
 
-    @PostMapping("/api/admin/seed")
+    @GetMapping("/api/admin/seed")
     public ResponseEntity<Map<String, Object>> seed() {
-        // 1. Fix admin role
-        var adminOpt = userRepository.findByEmail("admin@computaquest.com");
-        if (adminOpt.isPresent()) {
-            User admin = adminOpt.get();
-            if (admin.getRole() != Role.ADMIN) {
-                admin.setRole(Role.ADMIN);
-                userRepository.save(admin);
-                log.info("Rol de admin corregido a ADMIN");
+        // Fix admin role
+        try {
+            var adminOpt = userRepository.findByEmail("admin@computaquest.com");
+            if (adminOpt.isPresent()) {
+                User admin = adminOpt.get();
+                if (admin.getRole() != Role.ADMIN) {
+                    admin.setRole(Role.ADMIN);
+                    userRepository.save(admin);
+                    log.info("Rol de admin corregido a ADMIN");
+                }
             }
+        } catch (Exception e) {
+            log.error("Error fixing admin role: {}", e.getMessage());
         }
 
-        // 2. Seed challenges if empty
+        // Seed challenges if empty
         long count = challengeRepository.count();
         log.info("Challenges count before seed: {}", count);
 
         if (count == 0) {
-            seedChallenge1();
-            seedChallenge2();
-            seedChallenge3();
-            seedChallenge4();
-            log.info("Challenges seeded: {}", challengeRepository.count());
+            try {
+                seedChallenge1();
+                seedChallenge2();
+                seedChallenge3();
+                seedChallenge4();
+                log.info("Challenges seeded: {}", challengeRepository.count());
+            } catch (Exception e) {
+                log.error("Error seeding challenges: {}", e.getMessage(), e);
+            }
         }
 
         Map<String, Object> result = new HashMap<>();
