@@ -4,7 +4,6 @@ export default function MultipleSelect({ content, onComplete }) {
   const [selected, setSelected] = useState([])
 
   const options = content?.options || []
-  const correctAnswers = content?.correctAnswers || []
 
   const toggleOption = (option) => {
     setSelected(prev =>
@@ -41,7 +40,7 @@ export default function MultipleSelect({ content, onComplete }) {
       </div>
 
       <p className="select-hint">
-        Selecciona {correctAnswers.length} respuesta{correctAnswers.length > 1 ? 's' : ''}
+        Selecciona las opciones que consideres correctas
       </p>
 
       <button

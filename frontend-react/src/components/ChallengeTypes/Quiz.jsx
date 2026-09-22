@@ -27,13 +27,11 @@ export default function Quiz({ content, onComplete }) {
   }
 
   if (finished) {
-    const correct = answers.filter((a, i) => a === questions[i].a).length
     return (
       <div className="quiz-result">
         <i className="fa-solid fa-circle-check"></i>
-        <h4>¡Quiz Completado!</h4>
-        <p>Respuestas correctas: {correct} de {questions.length}</p>
-        <p className="quiz-score">Puntuacion: {Math.round((correct / questions.length) * 100)}%</p>
+        <h4>Quiz Completado!</h4>
+        <p>Tu respuesta fue enviada al servidor para validacion.</p>
       </div>
     )
   }

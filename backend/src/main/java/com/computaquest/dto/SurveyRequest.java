@@ -24,11 +24,11 @@ public class SurveyRequest {
     private Integer age;
 
     @NotBlank(message = "El grado escolar es requerido")
-    @Pattern(regexp = "8|9", message = "El grado debe ser 8 o 9")
+    @Pattern(regexp = "8vo|9no", message = "El grado debe ser '8vo' o '9no'")
     private String grade;
 
     @NotBlank(message = "El genero es requerido")
-    @Pattern(regexp = "M|F|Otro", message = "El genero debe ser M, F o Otro")
+    @Pattern(regexp = "M|F|O", message = "El genero debe ser M, F o O")
     private String gender;
 
     // Respuestas Likert (1-5)
