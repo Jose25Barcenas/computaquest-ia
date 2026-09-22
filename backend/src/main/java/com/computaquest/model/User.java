@@ -66,6 +66,9 @@ public class User implements UserDetails {
     @Builder.Default
     private List<String> badges = List.of();
 
+    @Builder.Default
+    private boolean accountLocked = false;
+
     @CreatedDate
     private Instant createdAt;
 
@@ -93,7 +96,7 @@ public class User implements UserDetails {
     @Override
     @Transient
     public boolean isAccountNonLocked() {
-        return true;
+        return !accountLocked;
     }
 
     @Override

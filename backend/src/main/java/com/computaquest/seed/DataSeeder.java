@@ -36,7 +36,7 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("=== DataSeeder iniciado ===");
-        log.info("Admin email configurado: {}", adminEmail);
+        log.info("Admin email: {}***", adminEmail.substring(0, Math.min(3, adminEmail.length())));
         try {
             seedAdmin();
             seedChallenges();
@@ -73,7 +73,7 @@ public class DataSeeder implements CommandLineRunner {
                         .avatar("avatar1")
                         .build();
                 userRepository.save(admin);
-                log.info("Usuario admin creado exitosamente: {}", adminEmail);
+                log.info("Usuario admin creado exitosamente");
             }
         } catch (Exception e) {
             log.error("ERROR en seedAdmin: {}", e.getMessage(), e);

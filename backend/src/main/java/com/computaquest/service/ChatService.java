@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @Service
@@ -28,7 +29,7 @@ public class ChatService {
 
     private static final int MAX_MESSAGES_PER_DAY = 30;
     private static final int MAX_MESSAGES_PER_CHAT = 50;
-    private final Map<String, List<Instant>> messageTimestamps = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, List<Instant>> messageTimestamps = new ConcurrentHashMap<>();
 
     private static final String SYSTEM_PROMPT = """
             Eres el Tutor de ComputaQuest IA, una plataforma educativa que enseña pensamiento computacional a estudiantes de secundaria (13-15 años).
@@ -58,6 +59,17 @@ public class ChatService {
             - Si el estudiante pregunta algo fuera de tema, redirige suavemente: "¡Buen intento! Pero como tutor de pensamiento computacional, puedo ayudarte mejor con temas como descomposición de problemas, patrones, abstracción o algoritmos. ¿Tienes alguna pregunta sobre estos pilares?"
             """;
 
+    private static final int MAX_INPUT_LENGTH = 1000;
+
+    private String sanitizeInput(String input) {
+        if (input == null) return "";
+        String sanitized = input.replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]", "");
+        if (sanitized.length() > MAX_INPUT_LENGTH) {
+            sanitized = sanitized.substring(0, MAX_INPUT_LENGTH);
+        }
+        return sanitized.trim();
+    }
+
     public ChatResponse sendMessage(String userId, ChatSendRequest request) {
         checkRateLimit(userId);
 
@@ -83,7 +95,7 @@ public class ChatService {
 
         chat.getMessages().add(Chat.ChatMessage.builder()
                 .role(MessageRole.USER)
-                .content(request.getMessage())
+                .content(sanitizeInput(request.getMessage()))
                 .build());
 
         String aiResponse = callOpenAI(chat);
@@ -134,13 +146,13 @@ public class ChatService {
         Instant now = Instant.now();
         Instant oneDayAgo = now.minusSeconds(86400);
 
-        List<Instant> timestamps = messageTimestamps.computeIfAbsent(userId, k -> new ArrayList<>());
+        List<Instant> timestamps = messageTimestamps.computeIfAbsent(userId, k -> new CopyOnWriteArrayList<>());
         timestamps.removeIf(t -> t.isBefore(oneDayAgo));
 
         if (timestamps.size() >= MAX_MESSAGES_PER_DAY) {
             log.warn("Rate limit exceeded for user: {}", userId);
             throw new ValidationAppException(
-                    "Has alcanzado el límite de " + MAX_MESSAGES_PER_DAY + " mensajes por día. Intenta de nuevo mañana.");
+                    "Has alcanzado el limite de " + MAX_MESSAGES_PER_DAY + " mensajes por dia. Intenta de nuevo manana.");
         }
 
         timestamps.add(now);

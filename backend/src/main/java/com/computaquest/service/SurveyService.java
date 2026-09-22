@@ -2,6 +2,7 @@ package com.computaquest.service;
 
 import com.computaquest.dto.SurveyDTO;
 import com.computaquest.dto.SurveyRequest;
+import com.computaquest.exception.ValidationAppException;
 import com.computaquest.model.Survey;
 import com.computaquest.repository.SurveyRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,12 @@ public class SurveyService {
     }
 
     public SurveyDTO submitSurvey(String userEmail, SurveyRequest request) {
+        for (Map.Entry<Integer, Integer> entry : request.getAnswers().entrySet()) {
+            if (entry.getValue() < 1 || entry.getValue() > 5) {
+                throw new ValidationAppException("Las respuestas deben estar entre 1 y 5. Pregunta " + entry.getKey() + ": " + entry.getValue());
+            }
+        }
+
         int total = request.getAnswers().values().stream().mapToInt(Integer::intValue).sum();
 
         // Calcular puntuaciones por dimension

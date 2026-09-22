@@ -30,7 +30,7 @@ public class HealthController {
         } catch (Exception e) {
             log.error("Error in health check: {}", e.getMessage());
             result.put("status", "ERROR");
-            result.put("error", "MongoDB no conectado: " + e.getMessage());
+            result.put("error", "Database connection failed");
         }
         return ResponseEntity.ok(result);
     }

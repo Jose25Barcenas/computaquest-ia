@@ -15,8 +15,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.HexFormat;
 
 @Slf4j
 @Service
@@ -27,6 +28,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -116,7 +119,9 @@ public class AuthService {
 
     public void forgotPassword(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
-            String resetToken = UUID.randomUUID().toString();
+            byte[] tokenBytes = new byte[32];
+            SECURE_RANDOM.nextBytes(tokenBytes);
+            String resetToken = HexFormat.of().formatHex(tokenBytes);
             user.setResetToken(resetToken);
             user.setResetTokenExpiry(Instant.now().plusSeconds(3600));
             userRepository.save(user);

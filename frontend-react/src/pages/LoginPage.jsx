@@ -153,6 +153,7 @@ export default function LoginPage() {
                   placeholder="Ej. Miguel..."
                   className={errors.name ? 'input-error' : ''}
                   required
+                  maxLength={50}
                 />
                 {errors.name && <span className="field-error">{errors.name}</span>}
               </div>

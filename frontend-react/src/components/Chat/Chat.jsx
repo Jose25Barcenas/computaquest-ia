@@ -131,6 +131,7 @@ export default function Chat() {
           placeholder="Escribe tu pregunta..."
           disabled={loading}
           aria-label="Mensaje para el tutor IA"
+          maxLength={1000}
         />
         <button type="submit" disabled={loading || !input.trim()}>
           <i className="fa-solid fa-paper-plane"></i>

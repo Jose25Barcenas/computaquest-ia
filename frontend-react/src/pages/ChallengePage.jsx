@@ -45,7 +45,7 @@ export default function ChallengePage() {
       setCompleted(true)
       setResult(data)
 
-      const score = data.score || clientScore
+      const score = data.score ?? 0
       const xpEarned = score >= 70 ? (challenge?.xpReward || 100) : Math.floor((challenge?.xpReward || 100) / 2)
       const ptsEarned = score >= 70 ? (challenge?.pointsReward || 10) : Math.floor((challenge?.pointsReward || 10) / 2)
 

@@ -151,11 +151,11 @@ export default function AdminPage() {
               <div className="form-grid">
                 <div className="input-group">
                   <label>Titulo</label>
-                  <input type="text" value={newChallenge.title} onChange={e => setNewChallenge({...newChallenge, title: e.target.value})} required />
+                  <input type="text" value={newChallenge.title} onChange={e => setNewChallenge({...newChallenge, title: e.target.value})} required maxLength={100} />
                 </div>
                 <div className="input-group">
                   <label>Descripcion</label>
-                  <textarea value={newChallenge.description} onChange={e => setNewChallenge({...newChallenge, description: e.target.value})} required />
+                  <textarea value={newChallenge.description} onChange={e => setNewChallenge({...newChallenge, description: e.target.value})} required maxLength={500} />
                 </div>
                 <div className="input-group">
                   <label>Tipo</label>

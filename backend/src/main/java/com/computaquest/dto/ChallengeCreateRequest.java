@@ -27,6 +27,7 @@ public class ChallengeCreateRequest {
     private String badgeName;
 
     @NotNull(message = "El contenido es requerido")
+    @Size(max = 50000, message = "El contenido no puede exceder 50KB")
     private Map<String, Object> content;
 
     private Boolean isActive;

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Map;
 public class SurveyRequest {
 
     @NotNull(message = "El tipo de encuesta es requerido")
+    @Pattern(regexp = "pre|post", message = "El tipo debe ser 'pre' o 'post'")
     private String type;
 
     // Datos demograficos
@@ -22,9 +24,11 @@ public class SurveyRequest {
     private Integer age;
 
     @NotBlank(message = "El grado escolar es requerido")
+    @Pattern(regexp = "8|9", message = "El grado debe ser 8 o 9")
     private String grade;
 
     @NotBlank(message = "El genero es requerido")
+    @Pattern(regexp = "M|F|Otro", message = "El genero debe ser M, F o Otro")
     private String gender;
 
     // Respuestas Likert (1-5)

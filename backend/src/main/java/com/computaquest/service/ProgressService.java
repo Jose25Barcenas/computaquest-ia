@@ -139,15 +139,13 @@ public class ProgressService {
 
     @SuppressWarnings("unchecked")
     private int calculateServerScore(Challenge challenge, CompleteChallengeRequest request) {
-        if (request.getUserAnswers() == null || request.getUserAnswers().isEmpty()) {
-            return Math.min(Math.max(request.getScore(), 0), 100);
-        }
-
         Map<String, Object> content = challenge.getContent();
-        if (content == null) return Math.min(Math.max(request.getScore(), 0), 100);
+        if (content == null) return 0;
 
         String type = (String) content.get("type");
-        if (type == null) return Math.min(Math.max(request.getScore(), 0), 100);
+        if (type == null) return 0;
+
+        if (request.getUserAnswers() == null || request.getUserAnswers().isEmpty()) return 0;
 
         int totalQuestions = 0;
         int correctAnswers = 0;
@@ -191,11 +189,11 @@ public class ProgressService {
                 }
             }
             default -> {
-                return Math.min(Math.max(request.getScore(), 0), 100);
+                return 0;
             }
         }
 
-        if (totalQuestions == 0) return Math.min(Math.max(request.getScore(), 0), 100);
+        if (totalQuestions == 0) return 0;
         return (int) Math.round((double) correctAnswers / totalQuestions * 100);
     }
 
@@ -211,7 +209,6 @@ public class ProgressService {
             User user = topUsers.get(i);
             leaderboard.add(LeaderboardEntry.builder()
                     .position(i + 1)
-                    .userId(user.getId())
                     .name(user.getName())
                     .avatar(user.getAvatar())
                     .points(user.getPoints())
