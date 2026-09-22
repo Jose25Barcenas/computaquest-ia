@@ -55,7 +55,7 @@ class ChallengeServiceTest {
 
     @Test
     void getAllChallengesByType() {
-        when(challengeRepository.findByTypeAndIsActiveTrue(ChallengeType.DECOMPOSITION))
+        when(challengeRepository.findByTypeAndIsActiveTrueOrderByOrderAsc(ChallengeType.DECOMPOSITION))
                 .thenReturn(List.of(createSampleChallenge()));
 
         List<ChallengeDTO> result = challengeService.getAllChallenges(ChallengeType.DECOMPOSITION, null);

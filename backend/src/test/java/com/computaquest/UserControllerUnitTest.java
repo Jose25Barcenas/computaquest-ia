@@ -1,6 +1,8 @@
 package com.computaquest;
 
 import com.computaquest.controller.UserController;
+import com.computaquest.dto.UserDTO;
+import com.computaquest.enums.Role;
 import com.computaquest.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
@@ -38,13 +39,13 @@ class UserControllerUnitTest {
     @Test
     void getAllUsersReturnsList() throws Exception {
         when(userService.getAllUsers()).thenReturn(
-                List.of(Map.of("_id", "1", "name", "Test", "email", "test@test.com"))
+                List.of(UserDTO.builder().id("1").name("Test").email("test@test.com").role(Role.STUDENT).build())
         );
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.users").isArray())
-                .andExpect(jsonPath("$.users[0].name").value("Test"));
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].name").value("Test"));
     }
 
     @Test

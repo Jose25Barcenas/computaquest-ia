@@ -1,5 +1,6 @@
 package com.computaquest.service;
 
+import com.computaquest.dto.UserDTO;
 import com.computaquest.exception.ResourceNotFoundException;
 import com.computaquest.model.User;
 import com.computaquest.repository.UserRepository;
@@ -35,10 +36,10 @@ class UserServiceTest {
                 .build();
         when(userRepository.findAll()).thenReturn(List.of(user));
 
-        List<Map<String, Object>> result = userService.getAllUsers();
+        List<UserDTO> result = userService.getAllUsers();
 
         assertFalse(result.isEmpty());
-        assertEquals("Test", result.get(0).get("name"));
+        assertEquals("Test", result.get(0).getName());
     }
 
     @Test
