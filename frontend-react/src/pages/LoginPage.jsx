@@ -96,17 +96,18 @@ export default function LoginPage() {
         setEmail('')
         setPassword('')
       } else if (mode === 'forgot') {
-        const data = await api.forgotPassword({ email })
-        setResetToken(data.token)
+        await api.forgotPassword({ email })
         setResetTokenSent(true)
         setMode('reset')
-        toast.info('Token generado. Copialo y crea tu nueva contrasena')
+        toast.info('Si existe una cuenta con ese email, revisa tu bandeja para restablecer tu contrasena')
       } else if (mode === 'reset') {
         await api.resetPassword({ token: resetToken, newPassword })
         toast.success('Contrasena restablecida! Ahora inicia sesion')
         setMode('login')
         setEmail('')
         setPassword('')
+        setNewPassword('')
+        setResetToken('')
       }
     } catch (error) {
       const msg = error.message || 'Error al procesar'
@@ -297,8 +298,7 @@ export default function LoginPage() {
             {resetTokenSent && (
               <div className="info-banner">
                 <i className="fa-solid fa-info-circle"></i>
-                Tu token de restablecimiento: <strong>{resetToken}</strong>
-                <br /><small>Copialo y pegalo en el campo de abajo</small>
+                Ingresa el token que recibiste en tu email para crear una nueva contrasena.
               </div>
             )}
             <form onSubmit={handleSubmit}>

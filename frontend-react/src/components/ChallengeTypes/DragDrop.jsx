@@ -63,11 +63,8 @@ export default function DragDrop({ content, onComplete }) {
   }
 
   const handleCheck = () => {
-    const correctOrder = content?.correctOrder || []
     const userOrder = items.map(i => i.id)
-    const isCorrect = JSON.stringify(correctOrder) === JSON.stringify(userOrder)
-    const score = isCorrect ? 100 : Math.floor((correctOrder.filter((id, i) => id === userOrder[i]).length / correctOrder.length) * 100)
-    onComplete(score)
+    onComplete(0, userOrder)
   }
 
   return (

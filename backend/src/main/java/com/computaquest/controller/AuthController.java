@@ -49,10 +49,9 @@ public class AuthController {
     @PostMapping("/forgot-password")
     @Operation(summary = "Olvide mi contrasena", description = "Genera un token de restablecimiento para el email proporcionado")
     public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        String token = authService.forgotPassword(request.getEmail());
+        authService.forgotPassword(request.getEmail());
         return ResponseEntity.ok(Map.of(
-                "message", "Token de restablecimiento generado",
-                "token", token
+                "message", "Si existe una cuenta con ese email, recibiras un enlace para restablecer tu contrasena."
         ));
     }
 

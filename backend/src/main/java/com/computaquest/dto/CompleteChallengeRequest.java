@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+import java.util.Map;
+
 @Data
 public class CompleteChallengeRequest {
 
@@ -16,4 +19,6 @@ public class CompleteChallengeRequest {
     @Min(value = 0, message = "El score no puede ser negativo")
     @Max(value = 100, message = "El score no puede ser mayor a 100")
     private Integer score;
+
+    private List<String> userAnswers;
 }

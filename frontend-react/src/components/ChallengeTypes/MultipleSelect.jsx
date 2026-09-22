@@ -15,13 +15,7 @@ export default function MultipleSelect({ content, onComplete }) {
   }
 
   const handleCheck = () => {
-    if (correctAnswers.length === 0) {
-      onComplete(0)
-      return
-    }
-    const correct = correctAnswers.filter(a => selected.includes(a)).length
-    const score = Math.round((correct / correctAnswers.length) * 100)
-    onComplete(score)
+    onComplete(0, selected)
   }
 
   return (

@@ -2,6 +2,12 @@ const API_BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
   : '/api'
 
+let onUnauthorized = null
+
+export function setOnUnauthorized(callback) {
+  onUnauthorized = callback
+}
+
 function getToken() {
   return localStorage.getItem('computaquest_token')
 }
@@ -24,7 +30,7 @@ async function request(endpoint, options = {}) {
 
   if (response.status === 401) {
     localStorage.removeItem('computaquest_token')
-    window.location.href = '/'
+    if (onUnauthorized) onUnauthorized()
     throw new Error('No autorizado')
   }
 

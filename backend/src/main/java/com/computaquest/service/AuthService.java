@@ -9,7 +9,6 @@ import com.computaquest.repository.UserRepository;
 import com.computaquest.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,15 +28,10 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
 
-    @Value("${ADMIN_EMAIL:admin@computaquest.com}")
-    private String adminEmail;
-
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ValidationAppException("Ya existe una cuenta con este email");
         }
-
-        Role assignedRole = request.getEmail().equalsIgnoreCase(adminEmail) ? Role.ADMIN : Role.STUDENT;
 
         User user = User.builder()
                 .name(request.getName())
@@ -45,11 +39,11 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .avatar(request.getAvatar() != null ? request.getAvatar() : "avatar1")
                 .grade(request.getGrade())
-                .role(assignedRole)
+                .role(Role.STUDENT)
                 .build();
 
         user = userRepository.save(user);
-        log.info("Nuevo usuario registrado: {} con rol: {}", user.getEmail(), assignedRole);
+        log.info("Nuevo usuario registrado: {} con rol: {}", user.getEmail(), user.getRole());
 
         String token = tokenProvider.generateToken(user.getEmail());
 
@@ -120,18 +114,14 @@ public class AuthService {
                 .build();
     }
 
-    public String forgotPassword(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("No existe una cuenta con este email"));
-
-        String resetToken = UUID.randomUUID().toString();
-        user.setResetToken(resetToken);
-        user.setResetTokenExpiry(Instant.now().plusSeconds(3600));
-        userRepository.save(user);
-
-        log.info("Token de restablecimiento generado para: {}", email);
-
-        return resetToken;
+    public void forgotPassword(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            String resetToken = UUID.randomUUID().toString();
+            user.setResetToken(resetToken);
+            user.setResetTokenExpiry(Instant.now().plusSeconds(3600));
+            userRepository.save(user);
+            log.info("Token de restablecimiento generado para: {}", email);
+        });
     }
 
     public void resetPassword(ResetPasswordRequest request) {

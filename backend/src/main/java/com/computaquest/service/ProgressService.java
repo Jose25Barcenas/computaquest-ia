@@ -120,8 +120,8 @@ public class ProgressService {
             log.info("Usuario {} subió a nivel {}", userEmail, user.getLevel());
         }
 
-        userRepository.save(user);
         progress = progressRepository.save(progress);
+        userRepository.save(user);
 
         Challenge challengeRef = challenge;
         return ProgressDTO.builder()
@@ -137,9 +137,66 @@ public class ProgressService {
                 .build();
     }
 
+    @SuppressWarnings("unchecked")
     private int calculateServerScore(Challenge challenge, CompleteChallengeRequest request) {
-        int clientScore = request.getScore();
-        return Math.min(Math.max(clientScore, 0), 100);
+        if (request.getUserAnswers() == null || request.getUserAnswers().isEmpty()) {
+            return Math.min(Math.max(request.getScore(), 0), 100);
+        }
+
+        Map<String, Object> content = challenge.getContent();
+        if (content == null) return Math.min(Math.max(request.getScore(), 0), 100);
+
+        String type = (String) content.get("type");
+        if (type == null) return Math.min(Math.max(request.getScore(), 0), 100);
+
+        int totalQuestions = 0;
+        int correctAnswers = 0;
+
+        switch (type) {
+            case "drag-drop" -> {
+                List<String> correctOrder = (List<String>) content.get("correctOrder");
+                if (correctOrder != null) {
+                    totalQuestions = correctOrder.size();
+                    List<String> userAnswers = request.getUserAnswers();
+                    for (int i = 0; i < Math.min(userAnswers.size(), correctOrder.size()); i++) {
+                        if (correctOrder.get(i).equals(userAnswers.get(i))) {
+                            correctAnswers++;
+                        }
+                    }
+                }
+            }
+            case "quiz" -> {
+                List<Map<String, Object>> questions = (List<Map<String, Object>>) content.get("questions");
+                if (questions != null) {
+                    totalQuestions = questions.size();
+                    List<String> userAnswers = request.getUserAnswers();
+                    for (int i = 0; i < Math.min(userAnswers.size(), questions.size()); i++) {
+                        String correct = (String) questions.get(i).get("a");
+                        if (correct != null && correct.equals(userAnswers.get(i))) {
+                            correctAnswers++;
+                        }
+                    }
+                }
+            }
+            case "multiple-select" -> {
+                List<String> correctAnswersList = (List<String>) content.get("correctAnswers");
+                if (correctAnswersList != null) {
+                    totalQuestions = correctAnswersList.size();
+                    List<String> userAnswers = request.getUserAnswers();
+                    for (String correct : correctAnswersList) {
+                        if (userAnswers.contains(correct)) {
+                            correctAnswers++;
+                        }
+                    }
+                }
+            }
+            default -> {
+                return Math.min(Math.max(request.getScore(), 0), 100);
+            }
+        }
+
+        if (totalQuestions == 0) return Math.min(Math.max(request.getScore(), 0), 100);
+        return (int) Math.round((double) correctAnswers / totalQuestions * 100);
     }
 
     public List<LeaderboardEntry> getLeaderboard() {

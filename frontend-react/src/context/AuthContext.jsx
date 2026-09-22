@@ -1,11 +1,21 @@
-import { createContext, useContext, useState, useEffect } from 'react'
-import api from '../services/api'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import api, { setOnUnauthorized } from '../services/api'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('computaquest_token')
+    setUser(null)
+  }, [])
+
+  useEffect(() => {
+    setOnUnauthorized(logout)
+    return () => setOnUnauthorized(null)
+  }, [logout])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -35,11 +45,6 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password, avatar, grade) => {
     const data = await api.register({ name, email, password, avatar, grade })
     return data
-  }
-
-  const logout = () => {
-    localStorage.removeItem('computaquest_token')
-    setUser(null)
   }
 
   const updateUser = (userData) => {

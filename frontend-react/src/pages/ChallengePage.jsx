@@ -35,12 +35,17 @@ export default function ChallengePage() {
     }
   }
 
-  const handleComplete = async (score) => {
+  const handleComplete = async (clientScore, userAnswers) => {
     try {
-      const data = await api.completeChallenge({ challengeId: id, score })
+      const data = await api.completeChallenge({
+        challengeId: id,
+        score: clientScore,
+        userAnswers: userAnswers || [],
+      })
       setCompleted(true)
       setResult(data)
 
+      const score = data.score || clientScore
       const xpEarned = score >= 70 ? (challenge?.xpReward || 100) : Math.floor((challenge?.xpReward || 100) / 2)
       const ptsEarned = score >= 70 ? (challenge?.pointsReward || 10) : Math.floor((challenge?.pointsReward || 10) / 2)
 

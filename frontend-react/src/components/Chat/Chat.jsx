@@ -55,7 +55,7 @@ export default function Chat() {
 
       setMessages(prev => [...prev, { role: 'ASSISTANT', content: data.message }])
       setActiveChat(data.chatId)
-      loadChats()
+      await loadChats()
     } catch (error) {
       setMessages(prev => [...prev, { role: 'ASSISTANT', content: 'Lo siento, hubo un error. Intenta de nuevo.' }])
       toast.error('Error al enviar mensaje')

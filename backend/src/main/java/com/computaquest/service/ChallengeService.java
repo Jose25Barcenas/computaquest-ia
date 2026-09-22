@@ -9,7 +9,7 @@ import com.computaquest.repository.ChallengeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,13 +32,13 @@ public class ChallengeService {
                     .toList();
         }
 
-        return challenges.stream().map(this::toDTO).toList();
+        return challenges.stream().map(this::toDTOSafe).toList();
     }
 
     public ChallengeDTO getChallengeById(String id) {
         Challenge challenge = challengeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reto no encontrado"));
-        return toDTO(challenge);
+        return toDTOSafe(challenge);
     }
 
     public ChallengeDTO createChallenge(ChallengeCreateRequest request) {
@@ -81,6 +81,47 @@ public class ChallengeService {
             throw new ResourceNotFoundException("Reto no encontrado");
         }
         challengeRepository.deleteById(id);
+    }
+
+    @SuppressWarnings("unchecked")
+    private ChallengeDTO toDTOSafe(Challenge challenge) {
+        Map<String, Object> safeContent = challenge.getContent() != null
+                ? new HashMap<>(challenge.getContent())
+                : null;
+
+        if (safeContent != null) {
+            safeContent.remove("correctOrder");
+            safeContent.remove("correctAnswers");
+
+            Object questions = safeContent.get("questions");
+            if (questions instanceof List<?> qList) {
+                List<Map<String, Object>> safeQuestions = new ArrayList<>();
+                for (Object q : qList) {
+                    if (q instanceof Map<?, ?> qMap) {
+                        Map<String, Object> sq = new HashMap<>();
+                        qMap.forEach((k, v) -> {
+                            if (!"a".equals(k)) sq.put((String) k, v);
+                        });
+                        safeQuestions.add(sq);
+                    }
+                }
+                safeContent.put("questions", safeQuestions);
+            }
+        }
+
+        return ChallengeDTO.builder()
+                .id(challenge.getId())
+                .title(challenge.getTitle())
+                .description(challenge.getDescription())
+                .type(challenge.getType())
+                .difficulty(challenge.getDifficulty())
+                .xpReward(challenge.getXpReward())
+                .pointsReward(challenge.getPointsReward())
+                .badgeName(challenge.getBadgeName())
+                .content(safeContent)
+                .isActive(challenge.getIsActive())
+                .order(challenge.getOrder())
+                .build();
     }
 
     private ChallengeDTO toDTO(Challenge challenge) {

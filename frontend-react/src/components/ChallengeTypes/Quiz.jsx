@@ -21,10 +21,8 @@ export default function Quiz({ content, onComplete }) {
     if (currentQ + 1 < questions.length) {
       setCurrentQ(currentQ + 1)
     } else {
-      const correct = newAnswers.filter((a, i) => a === questions[i].a).length
-      const score = Math.round((correct / questions.length) * 100)
       setFinished(true)
-      onComplete(score)
+      onComplete(0, newAnswers)
     }
   }
 

@@ -8,6 +8,7 @@ import { TYPE_INFO } from '../constants'
 export default function ChallengesPage() {
   const [challenges, setChallenges] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
   const typeFilter = searchParams.get('type')
   const toast = useToast()
@@ -18,11 +19,13 @@ export default function ChallengesPage() {
 
   const loadChallenges = async () => {
     setLoading(true)
+    setError(false)
     try {
       const params = typeFilter ? { type: typeFilter } : {}
       const data = await api.getChallenges(params)
       setChallenges(data)
     } catch (error) {
+      setError(true)
       toast.error('Error al cargar retos')
     } finally {
       setLoading(false)
@@ -52,6 +55,14 @@ export default function ChallengesPage() {
         <div className="challenges-grid">
           {loading ? (
             <div className="loading-screen"><div className="spinner"></div></div>
+          ) : error ? (
+            <div className="challenges-empty">
+              <i className="fa-solid fa-triangle-exclamation"></i>
+              <p>Error al cargar los retos. Intenta de nuevo.</p>
+              <button className="btn-primary" onClick={loadChallenges}>
+                <i className="fa-solid fa-arrow-rotate-right"></i> Reintentar
+              </button>
+            </div>
           ) : (
             <>
               {challenges.map(challenge => {

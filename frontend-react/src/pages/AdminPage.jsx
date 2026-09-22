@@ -18,8 +18,10 @@ export default function AdminPage() {
     xpReward: 100,
     pointsReward: 10,
     badgeName: '',
-    content: {},
+    contentStr: '{}',
   })
+
+  const [contentError, setContentError] = useState('')
 
   useEffect(() => {
     loadData()
@@ -66,12 +68,21 @@ export default function AdminPage() {
 
   const handleCreateChallenge = async (e) => {
     e.preventDefault()
+    setContentError('')
+    let parsedContent
     try {
-      const data = await api.createChallenge(newChallenge)
+      parsedContent = JSON.parse(newChallenge.contentStr)
+    } catch {
+      setContentError('JSON invalido. Revisa la sintaxis.')
+      return
+    }
+    try {
+      const { contentStr, ...rest } = newChallenge
+      const data = await api.createChallenge({ ...rest, content: parsedContent })
       setChallenges(prev => [...prev, data])
       setNewChallenge({
         title: '', description: '', type: 'decomposition',
-        difficulty: 1, xpReward: 100, pointsReward: 10, badgeName: '', content: {},
+        difficulty: 1, xpReward: 100, pointsReward: 10, badgeName: '', contentStr: '{}',
       })
       toast.success('Reto creado exitosamente')
     } catch (error) {
@@ -162,6 +173,18 @@ export default function AdminPage() {
                 <div className="input-group">
                   <label>Insignia</label>
                   <input type="text" value={newChallenge.badgeName} onChange={e => setNewChallenge({...newChallenge, badgeName: e.target.value})} placeholder="Opcional" />
+                </div>
+                <div className="input-group" style={{gridColumn: '1 / -1'}}>
+                  <label>Contenido (JSON)</label>
+                  <textarea
+                    value={newChallenge.contentStr}
+                    onChange={e => { setNewChallenge({...newChallenge, contentStr: e.target.value}); if (contentError) setContentError('') }}
+                    placeholder={'{\n  "type": "drag-drop",\n  "items": [{"id":"a","text":"Paso 1"},{"id":"b","text":"Paso 2"}],\n  "correctOrder": ["a","b"]\n}'}
+                    style={{fontFamily: 'monospace', minHeight: '150px', fontSize: '0.85rem'}}
+                    className={contentError ? 'input-error' : ''}
+                    required
+                  />
+                  {contentError && <span className="field-error">{contentError}</span>}
                 </div>
               </div>
               <button type="submit" className="btn-primary"><i className="fa-solid fa-plus"></i> Crear Reto</button>
