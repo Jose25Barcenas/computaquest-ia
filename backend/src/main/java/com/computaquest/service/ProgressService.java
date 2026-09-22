@@ -39,7 +39,7 @@ public class ProgressService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
-        List<Progress> progressList = progressRepository.findByUser(user.getId());
+        List<Progress> progressList = progressRepository.findByUser(user.getEmail());
         if (progressList.isEmpty()) {
             return List.of();
         }

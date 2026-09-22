@@ -7,12 +7,19 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 import java.util.Map;
 
 @Document(collection = "surveys")
+@CompoundIndexes({
+    @CompoundIndex(name = "user_type_idx", def = "{'user': 1, 'type': 1}"),
+    @CompoundIndex(name = "type_created_idx", def = "{'type': 1, 'createdAt': -1}")
+})
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,8 +29,10 @@ public class Survey {
     @Id
     private String id;
 
+    @Indexed
     private String user;
 
+    @Indexed
     private String type;
 
     // Datos demograficos

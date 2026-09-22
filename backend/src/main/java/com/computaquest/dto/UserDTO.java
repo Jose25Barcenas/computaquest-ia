@@ -18,6 +18,7 @@ public class UserDTO {
     private String name;
     private String email;
     private String avatar;
+    private String grade;
     private Role role;
     private Integer level;
     private Integer xp;

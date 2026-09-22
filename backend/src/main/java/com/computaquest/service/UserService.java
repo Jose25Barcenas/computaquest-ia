@@ -36,6 +36,7 @@ public class UserService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .avatar(user.getAvatar())
+                .grade(user.getGrade())
                 .role(user.getRole())
                 .level(user.getLevel())
                 .xp(user.getXp())

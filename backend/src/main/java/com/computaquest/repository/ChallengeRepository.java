@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface ChallengeRepository extends MongoRepository<Challenge, String> {
     List<Challenge> findByIsActiveTrueOrderByOrderAsc();
-    List<Challenge> findByTypeAndIsActiveTrue(ChallengeType type);
+    List<Challenge> findByTypeAndIsActiveTrueOrderByOrderAsc(ChallengeType type);
 }

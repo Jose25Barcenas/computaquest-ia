@@ -21,7 +21,7 @@ public class ChallengeService {
         List<Challenge> challenges;
 
         if (type != null) {
-            challenges = challengeRepository.findByTypeAndIsActiveTrue(type);
+            challenges = challengeRepository.findByTypeAndIsActiveTrueOrderByOrderAsc(type);
         } else {
             challenges = challengeRepository.findByIsActiveTrueOrderByOrderAsc();
         }
@@ -51,6 +51,7 @@ public class ChallengeService {
                 .pointsReward(request.getPointsReward() != null ? request.getPointsReward() : 10)
                 .badgeName(request.getBadgeName())
                 .content(request.getContent())
+                .isActive(request.getIsActive() != null ? request.getIsActive() : true)
                 .order(request.getOrder() != null ? request.getOrder() : 0)
                 .build();
 

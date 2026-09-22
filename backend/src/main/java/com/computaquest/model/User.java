@@ -51,6 +51,7 @@ public class User implements UserDetails {
     @Builder.Default
     private Integer xp = 0;
 
+    @Indexed
     @Builder.Default
     private Integer points = 0;
 
@@ -59,6 +60,7 @@ public class User implements UserDetails {
 
     private Instant lastLoginDate;
 
+    @Indexed
     private String resetToken;
 
     private Instant resetTokenExpiry;
