@@ -11,6 +11,15 @@ export default function Chat() {
   const messagesEndRef = useRef(null)
   const toast = useToast()
 
+  const loadChats = async () => {
+    try {
+      const data = await api.getUserChats()
+      setChats(data)
+    } catch {
+      toast.error('Error al cargar chats')
+    }
+  }
+
   useEffect(() => {
     loadChats()
   }, [])
@@ -19,21 +28,12 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  const loadChats = async () => {
-    try {
-      const data = await api.getUserChats()
-      setChats(data)
-    } catch (error) {
-      toast.error('Error al cargar chats')
-    }
-  }
-
   const loadChatHistory = async (chatId) => {
     try {
       const data = await api.getChatHistory(chatId)
       setMessages(data)
       setActiveChat(chatId)
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar historial')
     }
   }
@@ -56,7 +56,7 @@ export default function Chat() {
       setMessages(prev => [...prev, { role: 'ASSISTANT', content: data.message }])
       setActiveChat(data.chatId)
       await loadChats()
-    } catch (error) {
+    } catch {
       setMessages(prev => [...prev, { role: 'ASSISTANT', content: 'Lo siento, hubo un error. Intenta de nuevo.' }])
       toast.error('Error al enviar mensaje')
     } finally {

@@ -5,8 +5,23 @@ target/
 
 # Environment files
 .env
-.env.local
+.env.*
+!.env.example
+!.env.prod.example
 backend/.env
+backend/.env.*
+!backend/.env.example
+frontend-react/.env
+frontend-react/.env.*
+!frontend-react/.env.example
+
+# Secrets / certificates
+*.pem
+*.key
+*.p12
+*.jks
+*.crt
+*.cer
 
 # IDE
 .idea/

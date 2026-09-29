@@ -36,4 +36,6 @@ export const TYPE_INFO = {
   algorithms: CHALLENGE_TYPES.ALGORITHMS,
 }
 
+export const getTypeInfo = (type) => TYPE_INFO[String(type || '').toLowerCase()] || {}
+
 export const MODULES = Object.values(CHALLENGE_TYPES)

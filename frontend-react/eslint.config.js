@@ -1,9 +1,13 @@
 import js from '@eslint/js'
+import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import prettier from 'eslint-config-prettier'
 
 export default [
+  {
+    ignores: ['dist/**', 'node_modules/**', 'coverage/**'],
+  },
   js.configs.recommended,
   {
     files: ['**/*.{js,jsx}'],
@@ -12,8 +16,8 @@ export default [
       sourceType: 'module',
       parserOptions: { ecmaFeatures: { jsx: true } },
       globals: {
-        browser: true,
-        es2020: true,
+        ...globals.browser,
+        ...globals.es2021,
       },
     },
     plugins: {
@@ -22,8 +26,9 @@ export default [
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      'react-hooks/set-state-in-effect': 'off',
       'react-refresh/only-export-components': 'warn',
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },
   prettier,

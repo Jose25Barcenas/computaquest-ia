@@ -1,0 +1,6 @@
+target/
+src/test/
+.env
+.env.*
+*.iml
+Dockerfile.prod

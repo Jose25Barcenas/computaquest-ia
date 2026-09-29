@@ -31,8 +31,18 @@ LICENSE
 
 # Environment files
 .env
-.env.local
-.env.*.local
+.env.*
+backend/.env.*
+frontend-react/.env.*
+!.env.example
+!.env.prod.example
+
+# Secrets / certificates
+*.pem
+*.key
+*.p12
+*.jks
+id_rsa*
 
 # Logs
 *.log

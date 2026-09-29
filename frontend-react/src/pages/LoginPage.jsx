@@ -110,6 +110,15 @@ export default function LoginPage() {
         setResetToken('')
       }
     } catch (error) {
+      if (error.errors && Object.keys(error.errors).length > 0) {
+        const mapped = {}
+        Object.entries(error.errors).forEach(([field, message]) => {
+          mapped[field in { name: 1, email: 1, password: 1, grade: 1, resetToken: 1 } ? field : 'general'] = message
+        })
+        setErrors(mapped)
+        return
+      }
+
       const msg = error.message || 'Error al procesar'
 
       if (msg.toLowerCase().includes('email') || msg.toLowerCase().includes('correo')) {

@@ -27,11 +27,12 @@ public class HealthController {
             result.put("timestamp", java.time.Instant.now().toString());
             result.put("challengesCount", challengeRepository.count());
             result.put("usersCount", userRepository.count());
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("Error in health check: {}", e.getMessage());
             result.put("status", "ERROR");
             result.put("error", "Database connection failed");
+            return ResponseEntity.status(503).body(result);
         }
-        return ResponseEntity.ok(result);
     }
 }

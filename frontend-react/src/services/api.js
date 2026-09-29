@@ -35,8 +35,12 @@ async function request(endpoint, options = {}) {
   }
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Error del servidor' }))
-    throw new Error(error.message || 'Error del servidor')
+    const body = await response.json().catch(() => null)
+    const firstError = body?.errors ? Object.values(body.errors)[0] : null
+    const error = new Error(body?.message || firstError || 'Error del servidor')
+    error.status = response.status
+    error.errors = body?.errors || null
+    throw error
   }
 
   if (response.status === 204) return null

@@ -6,6 +6,7 @@ import { AuthProvider } from '../context/AuthContext'
 import { ThemeProvider } from '../context/ThemeContext'
 
 vi.mock('../services/api', () => ({
+  setOnUnauthorized: vi.fn(),
   default: { getMe: vi.fn().mockRejectedValue(new Error('no token')) },
 }))
 

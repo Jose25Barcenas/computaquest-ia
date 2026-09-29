@@ -5,7 +5,7 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem('computaquest_token')))
 
   const logout = useCallback(() => {
     localStorage.removeItem('computaquest_token')
@@ -20,18 +20,19 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const controller = new AbortController()
     const token = localStorage.getItem('computaquest_token')
-    if (token) {
-      api.getMe({ signal: controller.signal })
-        .then(data => {
-          setUser(data.user || data)
-        })
-        .catch(() => {
-          localStorage.removeItem('computaquest_token')
-        })
-        .finally(() => setLoading(false))
-    } else {
-      setLoading(false)
-    }
+    if (!token) return () => controller.abort()
+
+    api.getMe({ signal: controller.signal })
+      .then(data => {
+        setUser(data.user || data)
+      })
+      .catch(err => {
+        if (err?.name === 'AbortError') return
+        localStorage.removeItem('computaquest_token')
+        setUser(null)
+      })
+      .finally(() => setLoading(false))
+
     return () => controller.abort()
   }, [])
 

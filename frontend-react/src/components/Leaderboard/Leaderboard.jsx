@@ -8,18 +8,18 @@ export default function Leaderboard() {
   const { user } = useAuth()
   const toast = useToast()
 
-  useEffect(() => {
-    loadLeaderboard()
-  }, [])
-
   const loadLeaderboard = async () => {
     try {
       const data = await api.getLeaderboard()
       setEntries(data)
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar leaderboard')
     }
   }
+
+  useEffect(() => {
+    loadLeaderboard()
+  }, [])
 
   const positionIcons = ['fa-crown', 'fa-medal', 'fa-award']
 

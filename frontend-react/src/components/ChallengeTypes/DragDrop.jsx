@@ -20,7 +20,7 @@ export default function DragDrop({ content, onComplete }) {
     }
   }
 
-  const handleDragOver = (e, index) => {
+  const handleDragOver = (e, _index) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
   }
@@ -44,7 +44,7 @@ export default function DragDrop({ content, onComplete }) {
     setDraggedItem(item)
   }
 
-  const handleTouchEnd = (e, index) => {
+  const handleTouchEnd = (e, _index) => {
     if (!draggedItem) return
     const touch = e.changedTouches[0]
     const target = document.elementFromPoint(touch.clientX, touch.clientY)

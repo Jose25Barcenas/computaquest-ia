@@ -20,7 +20,7 @@ services:
       MONGODB_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-admin123}@mongodb:27017/computaquest?authSource=admin
       JWT_SECRET: ${JWT_SECRET:-computaquest-dev-secret-minimum-32-characters-long}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      FRONTEND_URL: http://localhost:3000
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
     depends_on:
       - mongodb
 

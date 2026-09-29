@@ -6,6 +6,7 @@ import { AuthProvider } from '../context/AuthContext'
 import { ToastProvider } from '../context/ToastContext'
 
 vi.mock('../services/api', () => ({
+  setOnUnauthorized: vi.fn(),
   default: {
     getLeaderboard: vi.fn().mockResolvedValue([]),
     getMe: vi.fn().mockRejectedValue(new Error('Not logged in')),

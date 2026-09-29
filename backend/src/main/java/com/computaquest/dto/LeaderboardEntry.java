@@ -9,6 +9,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class LeaderboardEntry {
     private Integer position;
+    private String userId;
     private String name;
     private String avatar;
     private Integer points;

@@ -12,10 +12,6 @@ export default function DashboardPage() {
   const [progress, setProgress] = useState([])
   const [leaderboard, setLeaderboard] = useState([])
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
   const loadData = async () => {
     try {
       const [progressData, leaderboardData] = await Promise.all([
@@ -24,10 +20,14 @@ export default function DashboardPage() {
       ])
       setProgress(progressData)
       setLeaderboard(leaderboardData)
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar datos del dashboard')
     }
   }
+
+  useEffect(() => {
+    loadData()
+  }, [])
 
   const completedCount = progress.filter(p => p.completed).length
 

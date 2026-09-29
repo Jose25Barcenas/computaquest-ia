@@ -23,10 +23,6 @@ export default function AdminPage() {
 
   const [contentError, setContentError] = useState('')
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
   const loadData = async () => {
     try {
       const [usersData, challengesData, surveysData] = await Promise.all([
@@ -34,15 +30,19 @@ export default function AdminPage() {
         api.getChallenges(),
         api.getAllSurveys(),
       ])
-      setUsers(usersData.users || [])
+      setUsers(Array.isArray(usersData) ? usersData : usersData?.users || [])
       setChallenges(challengesData)
       setSurveys(surveysData || [])
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar datos')
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    loadData()
+  }, [])
 
   const handleDeleteUser = async (id) => {
     if (!confirm('¿Eliminar este usuario?')) return
@@ -50,7 +50,7 @@ export default function AdminPage() {
       await api.deleteUser(id)
       setUsers(prev => prev.filter(u => u.id !== id))
       toast.success('Usuario eliminado')
-    } catch (error) {
+    } catch {
       toast.error('Error al eliminar usuario')
     }
   }
@@ -61,7 +61,7 @@ export default function AdminPage() {
       await api.deleteChallenge(id)
       setChallenges(prev => prev.filter(c => c.id !== id))
       toast.success('Reto eliminado')
-    } catch (error) {
+    } catch {
       toast.error('Error al eliminar reto')
     }
   }
@@ -77,7 +77,7 @@ export default function AdminPage() {
       return
     }
     try {
-      const { contentStr, ...rest } = newChallenge
+      const { contentStr: _contentStr, ...rest } = newChallenge
       const data = await api.createChallenge({ ...rest, content: parsedContent })
       setChallenges(prev => [...prev, data])
       setNewChallenge({
@@ -85,7 +85,7 @@ export default function AdminPage() {
         difficulty: 1, xpReward: 100, pointsReward: 10, badgeName: '', contentStr: '{}',
       })
       toast.success('Reto creado exitosamente')
-    } catch (error) {
+    } catch {
       toast.error('Error al crear reto')
     }
   }

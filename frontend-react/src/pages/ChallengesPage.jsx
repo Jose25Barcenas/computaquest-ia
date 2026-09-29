@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useToast } from '../context/ToastContext'
 import api from '../services/api'
 import Leaderboard from '../components/Leaderboard/Leaderboard'
-import { TYPE_INFO } from '../constants'
+import { getTypeInfo } from '../constants'
 
 export default function ChallengesPage() {
   const [challenges, setChallenges] = useState([])
@@ -13,10 +13,6 @@ export default function ChallengesPage() {
   const typeFilter = searchParams.get('type')
   const toast = useToast()
 
-  useEffect(() => {
-    loadChallenges()
-  }, [typeFilter])
-
   const loadChallenges = async () => {
     setLoading(true)
     setError(false)
@@ -24,13 +20,17 @@ export default function ChallengesPage() {
       const params = typeFilter ? { type: typeFilter } : {}
       const data = await api.getChallenges(params)
       setChallenges(data)
-    } catch (error) {
+    } catch {
       setError(true)
       toast.error('Error al cargar retos')
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    loadChallenges()
+  }, [typeFilter])
 
   const difficultyStars = (n) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -42,7 +42,7 @@ export default function ChallengesPage() {
     <div className="challenges-container">
       <h1 className="page-title">
         <i className="fa-solid fa-gamepad"></i>
-        {typeFilter ? TYPE_INFO[typeFilter]?.label || 'Retos' : 'Todos los Retos'}
+        {typeFilter ? getTypeInfo(typeFilter).label || 'Retos' : 'Todos los Retos'}
       </h1>
 
       {typeFilter && (
@@ -66,7 +66,7 @@ export default function ChallengesPage() {
           ) : (
             <>
               {challenges.map(challenge => {
-            const info = TYPE_INFO[challenge.type] || {}
+            const info = getTypeInfo(challenge.type)
             return (
               <Link
                 key={challenge.id}

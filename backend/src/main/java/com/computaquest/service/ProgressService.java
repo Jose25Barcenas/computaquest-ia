@@ -39,7 +39,7 @@ public class ProgressService {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
-        List<Progress> progressList = progressRepository.findByUser(user.getEmail());
+        List<Progress> progressList = progressRepository.findByUser(user.getId());
         if (progressList.isEmpty()) {
             return List.of();
         }
@@ -209,6 +209,7 @@ public class ProgressService {
             User user = topUsers.get(i);
             leaderboard.add(LeaderboardEntry.builder()
                     .position(i + 1)
+                    .userId(user.getId())
                     .name(user.getName())
                     .avatar(user.getAvatar())
                     .points(user.getPoints())

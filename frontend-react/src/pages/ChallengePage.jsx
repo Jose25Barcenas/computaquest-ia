@@ -7,7 +7,7 @@ import DragDrop from '../components/ChallengeTypes/DragDrop'
 import Quiz from '../components/ChallengeTypes/Quiz'
 import MultipleSelect from '../components/ChallengeTypes/MultipleSelect'
 import Chat from '../components/Chat/Chat'
-import { TYPE_INFO } from '../constants'
+import { getTypeInfo } from '../constants'
 
 export default function ChallengePage() {
   const { id } = useParams()
@@ -19,21 +19,21 @@ export default function ChallengePage() {
   const [completed, setCompleted] = useState(false)
   const [result, setResult] = useState(null)
 
-  useEffect(() => {
-    loadChallenge()
-  }, [id])
-
   const loadChallenge = async () => {
     try {
       const data = await api.getChallenge(id)
       setChallenge(data)
-    } catch (error) {
+    } catch {
       toast.error('Error al cargar el reto')
       navigate('/challenges')
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    loadChallenge()
+  }, [id])
 
   const handleComplete = async (clientScore, userAnswers) => {
     try {
@@ -85,7 +85,7 @@ export default function ChallengePage() {
   const xpEarned = result?.score >= 70 ? (challenge?.xpReward || 100) : Math.floor((challenge?.xpReward || 100) / 2)
   const ptsEarned = result?.score >= 70 ? (challenge?.pointsReward || 10) : Math.floor((challenge?.pointsReward || 10) / 2)
 
-  const info = TYPE_INFO[challenge.type] || {}
+  const info = getTypeInfo(challenge.type)
 
   return (
     <div className="challenge-page-container">
