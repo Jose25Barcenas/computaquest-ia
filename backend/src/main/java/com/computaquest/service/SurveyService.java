@@ -39,6 +39,9 @@ public class SurveyService {
         QUESTION_DIMENSIONS.put(15, "comunicacion");
     }
 
+    // Puntaje maximo de la encuesta: 15 preguntas Likert 1-5 (suma de respuestas)
+    public static final int MAX_SCORE = QUESTION_DIMENSIONS.size() * 5;
+
     public SurveyDTO submitSurvey(String userEmail, SurveyRequest request) {
         for (Map.Entry<Integer, Integer> entry : request.getAnswers().entrySet()) {
             if (entry.getValue() < 1 || entry.getValue() > 5) {
@@ -279,6 +282,7 @@ public class SurveyService {
                 .gender(survey.getGender())
                 .answers(survey.getAnswers())
                 .totalScore(survey.getTotalScore())
+                .maxScore(MAX_SCORE)
                 .dimensionScores(survey.getDimensionScores())
                 .createdAt(survey.getCreatedAt())
                 .build();

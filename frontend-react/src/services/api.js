@@ -44,7 +44,8 @@ async function request(endpoint, options = {}) {
   }
 
   if (response.status === 204) return null
-  return response.json()
+  const text = await response.text()
+  return text ? JSON.parse(text) : null
 }
 
 const api = {
@@ -60,12 +61,12 @@ const api = {
     const query = new URLSearchParams(params).toString()
     return request(`/challenges${query ? `?${query}` : ''}`)
   },
-  getChallenge: (id) => request(`/challenges/${id}`),
+  getChallenge: (id, options = {}) => request(`/challenges/${id}`, options),
   createChallenge: (data) => request('/challenges', { method: 'POST', body: JSON.stringify(data) }),
   updateChallenge: (id, data) => request(`/challenges/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteChallenge: (id) => request(`/challenges/${id}`, { method: 'DELETE' }),
 
-  getProgress: () => request('/progress'),
+  getProgress: (options = {}) => request('/progress', options),
   completeChallenge: (data) => request('/progress/complete', { method: 'POST', body: JSON.stringify(data) }),
   getLeaderboard: () => request('/progress/leaderboard'),
 

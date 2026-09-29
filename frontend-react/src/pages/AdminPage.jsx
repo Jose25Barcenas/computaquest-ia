@@ -31,8 +31,8 @@ export default function AdminPage() {
         api.getAllSurveys(),
       ])
       setUsers(Array.isArray(usersData) ? usersData : usersData?.users || [])
-      setChallenges(challengesData)
-      setSurveys(surveysData || [])
+      setChallenges(Array.isArray(challengesData) ? challengesData : [])
+      setSurveys(Array.isArray(surveysData) ? surveysData : [])
     } catch {
       toast.error('Error al cargar datos')
     } finally {
@@ -245,7 +245,7 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {surveys.map(s => {
-                  const maxScore = 50
+                  const maxScore = s.maxScore || 75
                   const pct = Math.round((s.totalScore / maxScore) * 100)
                   return (
                     <tr key={s.id}>

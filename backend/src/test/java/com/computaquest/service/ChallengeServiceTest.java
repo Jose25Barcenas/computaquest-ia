@@ -4,6 +4,7 @@ import com.computaquest.dto.ChallengeCreateRequest;
 import com.computaquest.dto.ChallengeDTO;
 import com.computaquest.enums.ChallengeType;
 import com.computaquest.exception.ResourceNotFoundException;
+import com.computaquest.exception.ValidationAppException;
 import com.computaquest.model.Challenge;
 import com.computaquest.repository.ChallengeRepository;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -84,6 +87,7 @@ class ChallengeServiceTest {
         ChallengeCreateRequest request = new ChallengeCreateRequest();
         request.setTitle("New Challenge");
         request.setType(ChallengeType.ALGORITHMS);
+        request.setContent(validQuizContent());
 
         when(challengeRepository.save(any(Challenge.class))).thenAnswer(inv -> {
             Challenge c = inv.getArgument(0);
@@ -95,6 +99,73 @@ class ChallengeServiceTest {
 
         assertEquals("New Challenge", result.getTitle());
         assertEquals(ChallengeType.ALGORITHMS, result.getType());
+    }
+
+    @Test
+    void createChallengeWithUnknownFormatRejected() {
+        ChallengeCreateRequest request = new ChallengeCreateRequest();
+        request.setTitle("Bad");
+        request.setType(ChallengeType.ALGORITHMS);
+        request.setContent(Map.of("type", "vero-que-no-existe"));
+
+        assertThrows(ValidationAppException.class, () -> challengeService.createChallenge(request));
+        verify(challengeRepository, never()).save(any(Challenge.class));
+    }
+
+    @Test
+    void createChallengeQuizWithoutAnswerRejected() {
+        ChallengeCreateRequest request = new ChallengeCreateRequest();
+        request.setTitle("Bad quiz");
+        request.setType(ChallengeType.PATTERNS);
+        Map<String, Object> question = new HashMap<>();
+        question.put("q", "Pregunta sin respuesta");
+        question.put("opts", List.of("a", "b"));
+        request.setContent(Map.of("type", "quiz", "questions", List.of(question)));
+
+        assertThrows(ValidationAppException.class, () -> challengeService.createChallenge(request));
+    }
+
+    @Test
+    void createChallengeEmptyQuestionsRejected() {
+        ChallengeCreateRequest request = new ChallengeCreateRequest();
+        request.setTitle("Empty quiz");
+        request.setType(ChallengeType.PATTERNS);
+        request.setContent(Map.of("type", "quiz", "questions", List.of()));
+
+        assertThrows(ValidationAppException.class, () -> challengeService.createChallenge(request));
+    }
+
+    @Test
+    void createChallengeMultipleSelectWithUnknownAnswerRejected() {
+        ChallengeCreateRequest request = new ChallengeCreateRequest();
+        request.setTitle("Bad select");
+        request.setType(ChallengeType.ABSTRACTION);
+        request.setContent(Map.of(
+                "type", "multiple-select",
+                "options", List.of("op1", "op2"),
+                "correctAnswers", List.of("op1", "que-no-existe")));
+
+        assertThrows(ValidationAppException.class, () -> challengeService.createChallenge(request));
+    }
+
+    @Test
+    void getChallengeByIdInactiveNotFound() {
+        Challenge inactive = createSampleChallenge();
+        inactive.setIsActive(false);
+        when(challengeRepository.findById("1")).thenReturn(Optional.of(inactive));
+
+        assertThrows(ResourceNotFoundException.class, () -> challengeService.getChallengeById("1"));
+    }
+
+    private Map<String, Object> validQuizContent() {
+        Map<String, Object> question = new HashMap<>();
+        question.put("q", "¿Cuanto es 2+2?");
+        question.put("opts", List.of("3", "4"));
+        question.put("a", "4");
+        Map<String, Object> content = new HashMap<>();
+        content.put("type", "quiz");
+        content.put("questions", List.of(question));
+        return content;
     }
 
     @Test

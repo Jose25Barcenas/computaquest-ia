@@ -56,11 +56,15 @@ App_Proyecto_grado/
 ### Opción 1: Docker (Recomendado)
 
 ```bash
-# Configurar variables de entorno
-export OPENAI_API_KEY=tu-api-key
+# 1. Configurar el entorno (JWT_SECRET es obligatorio)
+cp .env.example .env
+# Edita .env y genera un secreto: openssl rand -hex 32
 
-# Ejecutar todo
-docker-compose up --build
+# 2. Configurar la API key de OpenAI en .env
+#    OPENAI_API_KEY=sk-...
+
+# 3. Ejecutar todo
+docker compose up --build
 ```
 
 - Frontend: http://localhost:3000
@@ -70,8 +74,9 @@ docker-compose up --build
 ### Opción 2: Desarrollo Manual
 
 ```bash
-# Terminal 1 - Backend
+# Terminal 1 - Backend (JWT_SECRET es obligatorio, sin default)
 cd backend
+export JWT_SECRET=$(openssl rand -hex 32)   # Windows: set JWT_SECRET=...
 mvn spring-boot:run
 
 # Terminal 2 - Frontend
@@ -87,10 +92,17 @@ npm run dev
 | Variable | Descripción | Default |
 |----------|-------------|---------|
 | `MONGODB_URI` | URI de conexión MongoDB | `mongodb://localhost:27017/computaquest` |
-| `JWT_SECRET` | Secreto para tokens JWT | (configurar en producción) |
+| `JWT_SECRET` | Secreto para tokens JWT (mínimo 32 caracteres, **sin default**) | - (obligatorio) |
 | `JWT_EXPIRATION_MS` | Expiración del token (ms) | `604800000` (7 días) |
-| `OPENAI_API_KEY` | API Key de OpenAI | - |
-| `FRONTEND_URL` | URL del frontend (CORS) | `http://localhost:3000` |
+| `OPENAI_API_KEY` | API Key de OpenAI | `NOT_CONFIGURED` |
+| `CORS_ALLOWED_ORIGINS` | Orígenes permitidos por CORS (coma) | `http://localhost:3000` |
+| `FRONTEND_URL` | URL pública del frontend (links en emails) | `http://localhost:3000` |
+| `PORT` | Puerto del servidor | `4000` |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Credenciales del admin seed | `admin@computaquest.com` / `admin123` |
+| `SPRING_MAIL_HOST` | SMTP para recuperar contraseña (si no, `/forgot-password` → 503) | sin configurar |
+| `SPRING_MAIL_PORT` / `SPRING_MAIL_USERNAME` / `SPRING_MAIL_PASSWORD` | Credenciales SMTP | - |
+| `MAIL_FROM` | Remitiente de los emails | `noreply@computaquest.app` |
+| `TRUST_PROXY` | `true` solo detrás de un proxy (nginx/Railway) | `false` |
 
 ## Credenciales de Prueba
 
@@ -135,6 +147,9 @@ npm run dev
 | POST | `/api/auth/login` | No | Iniciar sesión |
 | GET | `/api/auth/me` | JWT | Obtener perfil |
 | PUT | `/api/auth/profile` | JWT | Actualizar perfil |
+| POST | `/api/auth/forgot-password` | No | Enviar token de restablecimiento por email (503 si no hay SMTP configurado) |
+| POST | `/api/auth/reset-password` | No | Restablecer contraseña con token |
+| POST | `/api/auth/change-password` | JWT | Cambiar contraseña (requiere la actual) |
 
 ### Challenges
 | Método | Ruta | Auth | Descripción |
@@ -165,14 +180,32 @@ npm run dev
 | GET | `/api/users` | Admin | Listar usuarios |
 | DELETE | `/api/users/:id` | Admin | Eliminar usuario |
 
+### Surveys (encuestas de investigación)
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| POST | `/api/surveys` | JWT | Enviar encuesta |
+| GET | `/api/surveys` | JWT | Encuestas del usuario |
+| GET | `/api/surveys/latest?type=` | JWT | Última encuesta del usuario |
+| GET | `/api/surveys/stats?type=` | Admin | Estadísticas generales |
+| GET | `/api/surveys/stats/:demographic?type=` | Admin | Estadísticas por demografía |
+| GET | `/api/surveys/all` | Admin | Todas las encuestas |
+
+### Sistema
+| Método | Ruta | Auth | Descripción |
+|--------|------|------|-------------|
+| GET | `/api/health` | No | Health check (503 si la BD falla) |
+| GET | `/swagger-ui` | No | Documentación OpenAPI (fuera de prod) |
+
+Cualquier endpoint no listado en las secciones "No" devuelve **401 sin token** y **403 sin rol adecuado**.
+
 ## Tecnologías
 
 - **Backend:** Java 17, Spring Boot 3.2, Spring Data MongoDB, Spring Security, JWT (jjwt), Lombok
 - **Frontend:** React 18, Vite, React Router, Chart.js, Font Awesome
 - **IA:** OpenAI API (GPT-3.5-turbo)
 - **BD:** MongoDB 6
-- **Infra:** Docker, Docker Compose
-- **Pruebas:** JUnit 5, MockMvc, TestContainers
+- **Infra:** Docker, Docker Compose, Railway, Nginx
+- **Pruebas:** JUnit 5, MockMvc + Spring Security Test, Mockito, MongoDB embebido (Flapdoodle), Vitest + Testing Library
 
 ## Autor
 

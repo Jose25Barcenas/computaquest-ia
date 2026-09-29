@@ -28,8 +28,9 @@ export function AuthProvider({ children }) {
       })
       .catch(err => {
         if (err?.name === 'AbortError') return
-        localStorage.removeItem('computaquest_token')
-        setUser(null)
+        // Un 401 ya cierra sesion via setOnUnauthorized (api.js).
+        // Otros errores (red, 500) no deben destruir la sesion.
+        if (err?.status === 401) setUser(null)
       })
       .finally(() => setLoading(false))
 

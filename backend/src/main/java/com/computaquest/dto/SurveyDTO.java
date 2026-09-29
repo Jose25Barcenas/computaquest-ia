@@ -23,6 +23,7 @@ public class SurveyDTO {
     // Respuestas
     private Map<Integer, Integer> answers;
     private Integer totalScore;
+    private Integer maxScore;
     private Map<String, Double> dimensionScores;
 
     // Metadata

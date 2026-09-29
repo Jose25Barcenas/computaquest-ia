@@ -22,3 +22,5 @@ app:
     temperature: 0.7
   cors:
     allowed-origins: http://localhost:3000
+  rate-limit:
+    enabled: false

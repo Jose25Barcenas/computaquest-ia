@@ -20,4 +20,10 @@ public class ProgressDTO {
     private Integer score;
     private Integer attempts;
     private Instant completedAt;
+    private Integer xpEarned;
+    private Integer pointsEarned;
+    private Integer userXp;
+    private Integer userPoints;
+    private Integer userLevel;
+    private Boolean levelUp;
 }

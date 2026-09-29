@@ -33,6 +33,7 @@ export default function QRCode({ url, size = 200, title = 'Escanea para acceder'
   const handleDownload = async () => {
     try {
       const response = await fetch(qrApiUrl)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const blob = await response.blob()
       const objectUrl = URL.createObjectURL(blob)
       const link = document.createElement('a')

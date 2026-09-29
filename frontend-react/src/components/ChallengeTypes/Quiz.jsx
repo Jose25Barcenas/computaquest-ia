@@ -6,7 +6,7 @@ export default function Quiz({ content, onComplete }) {
   const [selected, setSelected] = useState(null)
   const [finished, setFinished] = useState(false)
 
-  const questions = content?.questions || []
+  const questions = Array.isArray(content?.questions) ? content.questions : []
   const question = questions[currentQ]
 
   const handleAnswer = (answer) => {
@@ -24,6 +24,14 @@ export default function Quiz({ content, onComplete }) {
       setFinished(true)
       onComplete(0, newAnswers)
     }
+  }
+
+  if (questions.length === 0 || !question) {
+    return (
+      <div className="quiz-challenge">
+        <p className="field-error">Este reto no tiene preguntas disponibles.</p>
+      </div>
+    )
   }
 
   if (finished) {

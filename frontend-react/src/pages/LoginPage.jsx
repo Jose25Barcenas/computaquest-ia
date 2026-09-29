@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import api from '../services/api'
@@ -19,6 +20,19 @@ export default function LoginPage() {
   const toast = useToast()
 
   const avatars = ['avatar1', 'avatar2', 'avatar3', 'avatar4']
+
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // Enlace del email de recuperacion: /login?resetToken=...
+  useEffect(() => {
+    const token = searchParams.get('resetToken')
+    if (token) {
+      setMode('reset')
+      setResetToken(token)
+      setResetTokenSent(true)
+      setSearchParams({}, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
 
   const clearErrors = () => setErrors({})
 

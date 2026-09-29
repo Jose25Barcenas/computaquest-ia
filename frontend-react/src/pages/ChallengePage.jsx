@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
@@ -12,52 +12,77 @@ import { getTypeInfo } from '../constants'
 export default function ChallengePage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { user, updateUser } = useAuth()
+  const { updateUser } = useAuth()
   const toast = useToast()
   const [challenge, setChallenge] = useState(null)
   const [loading, setLoading] = useState(true)
   const [completed, setCompleted] = useState(false)
+  const [alreadyCompleted, setAlreadyCompleted] = useState(false)
   const [result, setResult] = useState(null)
 
-  const loadChallenge = async () => {
+  const loadChallenge = useCallback(async (signal) => {
+    setLoading(true)
+    setCompleted(false)
+    setAlreadyCompleted(false)
+    setResult(null)
     try {
-      const data = await api.getChallenge(id)
+      const [data, progressList] = await Promise.all([
+        api.getChallenge(id, { signal }),
+        api.getProgress({ signal }).catch(() => []),
+      ])
+      if (signal?.aborted) return
       setChallenge(data)
-    } catch {
+
+      const saved = Array.isArray(progressList)
+        ? progressList.find(p => p.challengeId === id && p.completed)
+        : null
+      if (saved) {
+        setCompleted(true)
+        setAlreadyCompleted(true)
+        setResult(saved)
+      }
+    } catch (err) {
+      if (err?.name === 'AbortError') return
       toast.error('Error al cargar el reto')
       navigate('/challenges')
     } finally {
-      setLoading(false)
+      if (!signal?.aborted) setLoading(false)
     }
-  }
+  }, [id, navigate, toast])
 
   useEffect(() => {
-    loadChallenge()
-  }, [id])
+    const controller = new AbortController()
+    loadChallenge(controller.signal)
+    return () => controller.abort()
+  }, [loadChallenge])
 
   const handleComplete = async (clientScore, userAnswers) => {
     try {
       const data = await api.completeChallenge({
         challengeId: id,
-        score: clientScore,
         userAnswers: userAnswers || [],
       })
       setCompleted(true)
       setResult(data)
 
       const score = data.score ?? 0
-      const xpEarned = score >= 70 ? (challenge?.xpReward || 100) : Math.floor((challenge?.xpReward || 100) / 2)
-      const ptsEarned = score >= 70 ? (challenge?.pointsReward || 10) : Math.floor((challenge?.pointsReward || 10) / 2)
+      const xpEarned = data.xpEarned ?? 0
+      const ptsEarned = data.pointsEarned ?? 0
 
       if (score >= 70) {
         toast.success(`¡Reto completado! +${xpEarned} XP, +${ptsEarned} pts`)
       } else {
-        toast.info(`Puntuacion: ${score}%. Necesitas 70% para pasar. +${xpEarned} XP, +${ptsEarned} pts`)
+        toast.info(`Puntuacion: ${score}%. Necesitas 70% para pasar.`)
+      }
+      if (data.levelUp) {
+        toast.success(`¡Subiste a nivel ${data.userLevel}!`)
       }
 
+      // El servidor es la fuente unica de XP/puntos/nivel
       updateUser({
-        xp: (user.xp || 0) + xpEarned,
-        points: (user.points || 0) + ptsEarned,
+        xp: data.userXp,
+        points: data.userPoints,
+        level: data.userLevel,
       })
     } catch (error) {
       toast.error(error.message || 'Error al guardar progreso')
@@ -82,8 +107,7 @@ export default function ChallengePage() {
     }
   }
 
-  const xpEarned = result?.score >= 70 ? (challenge?.xpReward || 100) : Math.floor((challenge?.xpReward || 100) / 2)
-  const ptsEarned = result?.score >= 70 ? (challenge?.pointsReward || 10) : Math.floor((challenge?.pointsReward || 10) / 2)
+  const score = result?.score ?? 0
 
   const info = getTypeInfo(challenge.type)
 
@@ -119,9 +143,19 @@ export default function ChallengePage() {
         ) : (
           <div className="challenge-completed glass-panel">
             <i className="fa-solid fa-circle-check"></i>
-            <h2>¡Reto Completado!</h2>
-            <p>Puntuacion: {result?.score || 0}%</p>
-            <p>+{xpEarned} XP, +{ptsEarned} pts</p>
+            {alreadyCompleted ? (
+              <>
+                <h2>Reto ya completado</h2>
+                <p>Tu mejor puntuacion: {score}%</p>
+                <p>Ya no es posible repetirlo, pero puedes seguir con los demas retos.</p>
+              </>
+            ) : (
+              <>
+                <h2>¡Reto Completado!</h2>
+                <p>Puntuacion: {score}%</p>
+                <p>+{result?.xpEarned ?? 0} XP, +{result?.pointsEarned ?? 0} pts</p>
+              </>
+            )}
             <button className="btn-primary" onClick={() => navigate('/challenges')}>
               <i className="fa-solid fa-gamepad"></i> Seguir Jugando
             </button>

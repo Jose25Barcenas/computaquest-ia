@@ -28,6 +28,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    private final MailService mailService;
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -122,6 +123,10 @@ public class AuthService {
             byte[] tokenBytes = new byte[32];
             SECURE_RANDOM.nextBytes(tokenBytes);
             String resetToken = HexFormat.of().formatHex(tokenBytes);
+
+            // Envia primero: si el correo falla, no se guarda ningun token
+            mailService.sendPasswordResetEmail(user.getEmail(), resetToken);
+
             user.setResetToken(resetToken);
             user.setResetTokenExpiry(Instant.now().plusSeconds(3600));
             userRepository.save(user);

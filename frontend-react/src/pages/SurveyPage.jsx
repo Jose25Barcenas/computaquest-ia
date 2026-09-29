@@ -145,6 +145,7 @@ export default function SurveyPage() {
   })
   const [answers, setAnswers] = useState({})
   const [result, setResult] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
 
   const handleDemographicChange = (field, value) => {
     setDemographicsData(prev => ({ ...prev, [field]: value }))
@@ -165,6 +166,8 @@ export default function SurveyPage() {
   }
 
   const handleSubmit = async () => {
+    if (submitting) return
+    setSubmitting(true)
     try {
       const data = await api.submitSurvey({
         type: surveyType,
@@ -178,6 +181,8 @@ export default function SurveyPage() {
       toast.success('Encuesta enviada exitosamente')
     } catch (error) {
       toast.error(error.message || 'Error al enviar encuesta')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -342,8 +347,8 @@ export default function SurveyPage() {
         <button className="btn-secondary" onClick={() => setStep('demographics')}>
           <i className="fa-solid fa-arrow-left"></i> Volver
         </button>
-        <button className="btn-primary" disabled={!allAnswered} onClick={handleSubmit}>
-          <i className="fa-solid fa-paper-plane"></i> Enviar Encuesta
+        <button className="btn-primary" disabled={!allAnswered || submitting} onClick={handleSubmit}>
+          {submitting ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-paper-plane"></i>} Enviar Encuesta
         </button>
       </div>
     </div>

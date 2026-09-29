@@ -75,6 +75,10 @@ public class ProgressService {
         Challenge challenge = challengeRepository.findById(request.getChallengeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Reto no encontrado"));
 
+        if (!Boolean.TRUE.equals(challenge.getIsActive())) {
+            throw new ValidationAppException("Este reto ya no esta disponible");
+        }
+
         Progress progress = progressRepository.findByUserAndChallenge(user.getId(), request.getChallengeId())
                 .orElse(Progress.builder()
                         .user(user.getId())
@@ -85,21 +89,25 @@ public class ProgressService {
             throw new ValidationAppException("Ya completaste este reto anteriormente");
         }
 
+        int attemptsBefore = progress.getAttempts();
         int score = calculateServerScore(challenge, request);
         boolean passed = score >= 70;
 
         progress.setScore(score);
-        progress.setAttempts(progress.getAttempts() + 1);
+        progress.setAttempts(attemptsBefore + 1);
         progress.setLastAttemptAt(Instant.now());
+
+        int xpEarned = 0;
+        int pointsEarned = 0;
 
         if (passed) {
             progress.setCompleted(true);
             progress.setCompletedAt(Instant.now());
 
-            int xpReward = challenge.getXpReward() > 0 ? challenge.getXpReward() : 100;
-            int pointsReward = challenge.getPointsReward() > 0 ? challenge.getPointsReward() : 10;
-            user.setXp(user.getXp() + xpReward);
-            user.setPoints(user.getPoints() + pointsReward);
+            xpEarned = challenge.getXpReward() > 0 ? challenge.getXpReward() : 100;
+            pointsEarned = challenge.getPointsReward() > 0 ? challenge.getPointsReward() : 10;
+            user.setXp(user.getXp() + xpEarned);
+            user.setPoints(user.getPoints() + pointsEarned);
 
             if (challenge.getBadgeName() != null && !user.getBadges().contains(challenge.getBadgeName())) {
                 user.setBadges(new ArrayList<>(user.getBadges()));
@@ -107,21 +115,28 @@ public class ProgressService {
             }
 
             log.info("Usuario {} completó reto '{}' con score {} (passed={})", userEmail, challenge.getTitle(), score, passed);
-        } else {
-            user.setXp(user.getXp() + XP_CHALLENGE_FAIL);
-            user.setPoints(user.getPoints() + POINTS_CHALLENGE_FAIL);
+        } else if (attemptsBefore == 0) {
+            // Consuelo solo en el primer intento: evita farmear XP repitiendo el reto
+            xpEarned = XP_CHALLENGE_FAIL;
+            pointsEarned = POINTS_CHALLENGE_FAIL;
+            user.setXp(user.getXp() + xpEarned);
+            user.setPoints(user.getPoints() + pointsEarned);
 
             log.info("Usuario {} intentó reto '{}' con score {} (passed={})", userEmail, challenge.getTitle(), score, passed);
+        } else {
+            log.info("Usuario {} reintentó reto '{}' con score {} (passed={})", userEmail, challenge.getTitle(), score, passed);
         }
 
+        boolean levelUp = false;
         while (user.getXp() >= XP_PER_LEVEL) {
             user.setXp(user.getXp() - XP_PER_LEVEL);
             user.setLevel(user.getLevel() + 1);
+            levelUp = true;
             log.info("Usuario {} subió a nivel {}", userEmail, user.getLevel());
         }
 
         progress = progressRepository.save(progress);
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         Challenge challengeRef = challenge;
         return ProgressDTO.builder()
@@ -134,6 +149,12 @@ public class ProgressService {
                 .score(progress.getScore())
                 .attempts(progress.getAttempts())
                 .completedAt(progress.getCompletedAt())
+                .xpEarned(xpEarned)
+                .pointsEarned(pointsEarned)
+                .userXp(savedUser.getXp())
+                .userPoints(savedUser.getPoints())
+                .userLevel(savedUser.getLevel())
+                .levelUp(levelUp)
                 .build();
     }
 
@@ -186,6 +207,9 @@ public class ProgressService {
                             correctAnswers++;
                         }
                     }
+                    // Penalizar selecciones extra: sin esto, marcar todo da 100%
+                    long extras = userAnswers.stream().filter(a -> !correctAnswersList.contains(a)).count();
+                    correctAnswers -= extras;
                 }
             }
             default -> {
@@ -194,7 +218,8 @@ public class ProgressService {
         }
 
         if (totalQuestions == 0) return 0;
-        return (int) Math.round((double) correctAnswers / totalQuestions * 100);
+        int raw = (int) Math.round((double) correctAnswers / totalQuestions * 100);
+        return Math.max(0, raw);
     }
 
     public List<LeaderboardEntry> getLeaderboard() {
