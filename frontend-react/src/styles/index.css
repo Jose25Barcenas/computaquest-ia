@@ -436,6 +436,22 @@ body {
 .admin-form h3 { margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
 
+/* ADMIN - KPIs y resultados pre/post */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.kpi-card { padding: 1.25rem; position: relative; }
+.kpi-card i { font-size: 1.4rem; color: var(--primary); margin-bottom: 0.5rem; display: block; }
+.kpi-value { font-size: 1.8rem; font-weight: 700; line-height: 1.1; }
+.kpi-label { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.kpi-sub { color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.4rem; }
+.kpi-card.positive .kpi-value { color: var(--secondary); }
+.kpi-card.negative .kpi-value { color: var(--danger, #ef4444); }
+.delta-positive { color: var(--secondary); font-weight: 600; }
+.delta-negative { color: #ef4444; font-weight: 600; }
+.dimension-bar { height: 6px; background: var(--bg-card); border-radius: 3px; overflow: hidden; min-width: 80px; }
+.dimension-bar > div { height: 100%; background: var(--primary); border-radius: 3px; }
+.dimension-bar.post > div { background: var(--secondary); }
+.admin-toolbar { display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 1rem; }
+
 /* TOAST */
 .toast-container { position: fixed; top: 80px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 0.5rem; }
 .toast { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.875rem; animation: slideIn 0.3s ease; }

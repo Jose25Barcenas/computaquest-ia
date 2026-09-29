@@ -77,6 +77,10 @@ const api = {
   getUsers: () => request('/users'),
   deleteUser: (id) => request(`/users/${id}`, { method: 'DELETE' }),
 
+  getAdminStats: () => request('/admin/stats'),
+
+  getSurveyComparison: () => request('/surveys/compare'),
+
   submitSurvey: (data) => request('/surveys', { method: 'POST', body: JSON.stringify(data) }),
   getUserSurveys: () => request('/surveys'),
   getLatestSurvey: (type) => request(`/surveys/latest?type=${type}`),

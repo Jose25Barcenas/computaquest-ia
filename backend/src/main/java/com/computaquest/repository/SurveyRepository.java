@@ -12,4 +12,5 @@ public interface SurveyRepository extends MongoRepository<Survey, String> {
     List<Survey> findByUserOrderByCreatedAtDesc(String user);
     Optional<Survey> findFirstByUserAndTypeOrderByCreatedAtDesc(String user, String type);
     List<Survey> findByTypeOrderByCreatedAtDesc(String type);
+    long countByType(String type);
 }

@@ -82,6 +82,89 @@ public class SurveyService {
                 .orElse(null);
     }
 
+    /**
+     * Comparativa pre/post: promedios globales, por dimension y pareo estudiante a estudiante.
+     * Usa la ultima encuesta de cada tipo por estudiante.
+     */
+    public com.computaquest.dto.SurveyComparisonDTO getComparison() {
+        List<Survey> all = surveyRepository.findAll();
+
+        Map<String, Survey> latestPre = latestByUser(all, "pre");
+        Map<String, Survey> latestPost = latestByUser(all, "post");
+
+        double preAvg = averageTotal(latestPre.values());
+        double postAvg = averageTotal(latestPost.values());
+
+        Map<String, Double> preDims = calculateDimensionAverages(new ArrayList<>(latestPre.values()));
+        Map<String, Double> postDims = calculateDimensionAverages(new ArrayList<>(latestPost.values()));
+
+        Set<String> allDimensions = new TreeSet<>();
+        allDimensions.addAll(preDims.keySet());
+        allDimensions.addAll(postDims.keySet());
+
+        Map<String, Double> dimDelta = new HashMap<>();
+        for (String dim : allDimensions) {
+            double pre = preDims.getOrDefault(dim, 0.0);
+            double post = postDims.getOrDefault(dim, 0.0);
+            dimDelta.put(dim, Math.round((post - pre) * 100.0) / 100.0);
+        }
+
+        List<com.computaquest.dto.SurveyComparisonDTO.PairedResult> paired = new ArrayList<>();
+        for (Map.Entry<String, Survey> entry : latestPre.entrySet()) {
+            Survey post = latestPost.get(entry.getKey());
+            if (post == null) continue;
+            Survey pre = entry.getValue();
+            paired.add(com.computaquest.dto.SurveyComparisonDTO.PairedResult.builder()
+                    .user(pre.getUser())
+                    .grade(pre.getGrade() != null ? pre.getGrade() : post.getGrade())
+                    .pre(pre.getTotalScore())
+                    .post(post.getTotalScore())
+                    .delta(post.getTotalScore() - pre.getTotalScore())
+                    .build());
+        }
+        paired.sort(Comparator.comparingInt(
+                com.computaquest.dto.SurveyComparisonDTO.PairedResult::getDelta).reversed());
+
+        return com.computaquest.dto.SurveyComparisonDTO.builder()
+                .preCount(latestPre.size())
+                .postCount(latestPost.size())
+                .pairedCount(paired.size())
+                .preAverage(preAvg)
+                .postAverage(postAvg)
+                .averageDelta(Math.round((postAvg - preAvg) * 100.0) / 100.0)
+                .maxScore(MAX_SCORE)
+                .preDimensions(preDims)
+                .postDimensions(postDims)
+                .dimensionDelta(dimDelta)
+                .paired(paired)
+                .build();
+    }
+
+    private Map<String, Survey> latestByUser(List<Survey> surveys, String type) {
+        Map<String, Survey> latest = new HashMap<>();
+        for (Survey s : surveys) {
+            if (!type.equals(s.getType())) continue;
+            Survey current = latest.get(s.getUser());
+            if (current == null || isNewer(s, current)) {
+                latest.put(s.getUser(), s);
+            }
+        }
+        return latest;
+    }
+
+    private boolean isNewer(Survey a, Survey b) {
+        if (a.getCreatedAt() == null) return false;
+        if (b.getCreatedAt() == null) return true;
+        return a.getCreatedAt().isAfter(b.getCreatedAt());
+    }
+
+    private double averageTotal(Collection<Survey> surveys) {
+        return surveys.stream()
+                .mapToInt(Survey::getTotalScore)
+                .average()
+                .orElse(0.0);
+    }
+
     public Map<String, Object> getSurveyStats(String type) {
         List<Survey> surveys = surveyRepository.findByTypeOrderByCreatedAtDesc(type);
 

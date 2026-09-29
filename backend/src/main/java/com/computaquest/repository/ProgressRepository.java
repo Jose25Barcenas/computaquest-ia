@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface ProgressRepository extends MongoRepository<Progress, String> {
     Optional<Progress> findByUserAndChallenge(String userId, String challengeId);
     List<Progress> findByUser(String userId);
+    long countByCompletedTrue();
 }

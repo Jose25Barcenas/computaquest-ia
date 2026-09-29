@@ -3,10 +3,12 @@ import api from '../services/api'
 import { useToast } from '../context/ToastContext'
 
 export default function AdminPage() {
-  const [tab, setTab] = useState('users')
+  const [tab, setTab] = useState('overview')
   const [users, setUsers] = useState([])
   const [challenges, setChallenges] = useState([])
   const [surveys, setSurveys] = useState([])
+  const [stats, setStats] = useState(null)
+  const [comparison, setComparison] = useState(null)
   const [loading, setLoading] = useState(true)
   const toast = useToast()
 
@@ -25,14 +27,18 @@ export default function AdminPage() {
 
   const loadData = async () => {
     try {
-      const [usersData, challengesData, surveysData] = await Promise.all([
+      const [usersData, challengesData, surveysData, statsData, comparisonData] = await Promise.all([
         api.getUsers(),
         api.getChallenges(),
         api.getAllSurveys(),
+        api.getAdminStats().catch(() => null),
+        api.getSurveyComparison().catch(() => null),
       ])
       setUsers(Array.isArray(usersData) ? usersData : usersData?.users || [])
       setChallenges(Array.isArray(challengesData) ? challengesData : [])
       setSurveys(Array.isArray(surveysData) ? surveysData : [])
+      setStats(statsData)
+      setComparison(comparisonData)
     } catch {
       toast.error('Error al cargar datos')
     } finally {
@@ -92,13 +98,55 @@ export default function AdminPage() {
 
   if (loading) return <div className="loading-screen"><div className="spinner"></div></div>
 
+  const dimensionLabel = (key) =>
+    key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+
+  const exportCsv = () => {
+    if (!comparison) return
+    const rows = [
+      ['Resultados Pre/Post - ComputaQuest'],
+      [],
+      ['Metrica', 'Pre', 'Post', 'Delta', 'Maximo'],
+      ['Promedio general', comparison.preAverage, comparison.postAverage, comparison.averageDelta, comparison.maxScore],
+      ['Respuestas', comparison.preCount, comparison.postCount, comparison.pairedCount],
+      [],
+      ['Dimension', 'Pre', 'Post', 'Delta'],
+      ...Object.keys(comparison.preDimensions || {}).concat(
+        Object.keys(comparison.postDimensions || {}).filter(d => !(comparison.preDimensions || {})[d])
+      ).map(d => [
+        dimensionLabel(d),
+        comparison.preDimensions?.[d] ?? 0,
+        comparison.postDimensions?.[d] ?? 0,
+        comparison.dimensionDelta?.[d] ?? 0,
+      ]),
+      [],
+      ['Estudiante', 'Grado', 'Pre', 'Post', 'Delta'],
+      ...(comparison.paired || []).map(p => [p.user, p.grade || '', p.pre, p.post, p.delta]),
+    ]
+    const csv = rows
+      .map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = 'resultados-pre-post.csv'
+    link.click()
+    URL.revokeObjectURL(link.href)
+  }
+
   return (
     <div className="admin-container">
       <h1 className="page-title"><i className="fa-solid fa-gear"></i> Panel de Administracion</h1>
 
       <div className="admin-tabs">
+        <button className={`tab-btn ${tab === 'overview' ? 'active' : ''}`} onClick={() => setTab('overview')}>
+          <i className="fa-solid fa-chart-line"></i> Resumen
+        </button>
+        <button className={`tab-btn ${tab === 'results' ? 'active' : ''}`} onClick={() => setTab('results')}>
+          <i className="fa-solid fa-flask"></i> Pre / Post
+        </button>
         <button className={`tab-btn ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}>
-          <i className="fa-solid fa-users"></i> Usuarios ({users.length})
+          <i className="fa-solid fa-users"></i> Estudiantes ({users.length})
         </button>
         <button className={`tab-btn ${tab === 'challenges' ? 'active' : ''}`} onClick={() => setTab('challenges')}>
           <i className="fa-solid fa-gamepad"></i> Retos ({challenges.length})
@@ -107,6 +155,51 @@ export default function AdminPage() {
           <i className="fa-solid fa-clipboard-list"></i> Encuestas ({surveys.length})
         </button>
       </div>
+
+      {tab === 'overview' && (
+        <div className="kpi-grid">
+          <div className="kpi-card glass-panel">
+            <i className="fa-solid fa-user-graduate"></i>
+            <div className="kpi-value">{stats?.studentsTotal ?? '—'}</div>
+            <div className="kpi-label">Estudiantes</div>
+            <div className="kpi-sub">{stats?.studentsActive7d ?? 0} activos en los ultimos 7 dias</div>
+          </div>
+          <div className="kpi-card glass-panel">
+            <i className="fa-solid fa-gamepad"></i>
+            <div className="kpi-value">{stats?.challengesActive ?? '—'}</div>
+            <div className="kpi-label">Retos activos</div>
+            <div className="kpi-sub">de {stats?.challengesTotal ?? 0} creados</div>
+          </div>
+          <div className="kpi-card glass-panel">
+            <i className="fa-solid fa-circle-check"></i>
+            <div className="kpi-value">{stats?.challengesCompleted ?? '—'}</div>
+            <div className="kpi-label">Retos completados</div>
+            <div className="kpi-sub">Tasa global: {stats?.completionRate ?? 0}%</div>
+          </div>
+          <div className="kpi-card glass-panel">
+            <i className="fa-solid fa-clipboard-question"></i>
+            <div className="kpi-value">{stats?.surveysPre ?? '—'}</div>
+            <div className="kpi-label">Pre-test recibidos</div>
+            <div className="kpi-sub">Encuestas iniciales</div>
+          </div>
+          <div className="kpi-card glass-panel">
+            <i className="fa-solid fa-clipboard-check"></i>
+            <div className="kpi-value">{stats?.surveysPost ?? '—'}</div>
+            <div className="kpi-label">Post-test recibidos</div>
+            <div className="kpi-sub">Encuestas finales</div>
+          </div>
+          <div className="kpi-card glass-panel">
+            <i className="fa-solid fa-code-compare"></i>
+            <div className="kpi-value">{comparison?.pairedCount ?? '—'}</div>
+            <div className="kpi-label">Estudiantes comparables</div>
+            <div className="kpi-sub">Con pre-test y post-test</div>
+          </div>
+        </div>
+      )}
+
+      {tab === 'results' && (
+        <ResultsPanel comparison={comparison} onExport={exportCsv} />
+      )}
 
       {tab === 'users' && (
         <div className="admin-table glass-panel">
@@ -271,5 +364,149 @@ export default function AdminPage() {
         </div>
       )}
     </div>
+  )
+}
+
+function ResultsPanel({ comparison, onExport }) {
+  if (!comparison) {
+    return (
+      <div className="admin-table glass-panel">
+        <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+          <i className="fa-solid fa-flask" style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}></i>
+          Aun no hay datos de encuestas pre/post
+        </p>
+      </div>
+    )
+  }
+
+  const label = (key) => key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+  const max = comparison.maxScore || 75
+  const dimensions = Object.keys({
+    ...comparison.preDimensions,
+    ...comparison.postDimensions,
+  })
+
+  return (
+    <>
+      <div className="kpi-grid">
+        <div className="kpi-card glass-panel">
+          <i className="fa-solid fa-clipboard-question"></i>
+          <div className="kpi-value">{comparison.preAverage} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/ {max}</span></div>
+          <div className="kpi-label">Promedio pre-test</div>
+          <div className="kpi-sub">{comparison.preCount} respuestas</div>
+        </div>
+        <div className="kpi-card glass-panel">
+          <i className="fa-solid fa-clipboard-check"></i>
+          <div className="kpi-value">{comparison.postAverage} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>/ {max}</span></div>
+          <div className="kpi-label">Promedio post-test</div>
+          <div className="kpi-sub">{comparison.postCount} respuestas</div>
+        </div>
+        <div className={`kpi-card glass-panel ${comparison.averageDelta > 0 ? 'positive' : comparison.averageDelta < 0 ? 'negative' : ''}`}>
+          <i className="fa-solid fa-arrow-trend-up"></i>
+          <div className="kpi-value">{comparison.averageDelta > 0 ? '+' : ''}{comparison.averageDelta}</div>
+          <div className="kpi-label">Mejora promedio</div>
+          <div className="kpi-sub">Post menos pre</div>
+        </div>
+        <div className="kpi-card glass-panel">
+          <i className="fa-solid fa-users"></i>
+          <div className="kpi-value">{comparison.pairedCount}</div>
+          <div className="kpi-label">Pareados</div>
+          <div className="kpi-sub">Estudiantes con ambas encuestas</div>
+        </div>
+      </div>
+
+      <div className="admin-toolbar">
+        <button className="btn-secondary" onClick={onExport}>
+          <i className="fa-solid fa-file-csv"></i> Exportar CSV
+        </button>
+      </div>
+
+      <div className="admin-table glass-panel">
+        <h3 style={{ padding: '1rem 0.75rem 0', fontSize: '0.95rem' }}>
+          <i className="fa-solid fa-layer-group"></i> Resultados por dimension
+        </h3>
+        {dimensions.length === 0 ? (
+          <p style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)' }}>Sin dimensiones registradas</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Dimension</th>
+                <th>Pre</th>
+                <th>Post</th>
+                <th>Delta</th>
+                <th style={{ width: '30%' }}>Comparacion</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dimensions.map(d => {
+                const pre = comparison.preDimensions?.[d] ?? 0
+                const post = comparison.postDimensions?.[d] ?? 0
+                const delta = comparison.dimensionDelta?.[d] ?? 0
+                return (
+                  <tr key={d}>
+                    <td>{label(d)}</td>
+                    <td>{pre}</td>
+                    <td>{post}</td>
+                    <td className={delta > 0 ? 'delta-positive' : delta < 0 ? 'delta-negative' : ''}>
+                      {delta > 0 ? '+' : ''}{delta}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div className="dimension-bar"><div style={{ width: `${Math.min(100, (pre / 5) * 100)}%` }}></div></div>
+                        <div className="dimension-bar post"><div style={{ width: `${Math.min(100, (post / 5) * 100)}%` }}></div></div>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div className="admin-table glass-panel">
+        <h3 style={{ padding: '1rem 0.75rem 0', fontSize: '0.95rem' }}>
+          <i className="fa-solid fa-user-graduate"></i> Resultado por estudiante
+        </h3>
+        {comparison.paired.length === 0 ? (
+          <p style={{ textAlign: 'center', padding: '1.5rem', color: 'var(--text-muted)' }}>
+            Ningun estudiante tiene pre-test y post-test a la vez
+          </p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Estudiante</th>
+                <th>Grado</th>
+                <th>Pre</th>
+                <th>Post</th>
+                <th>Delta</th>
+                <th>Progreso</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparison.paired.map(p => {
+                const pct = Math.round(((p.post - p.pre) / max) * 100)
+                return (
+                  <tr key={p.user}>
+                    <td>{p.user}</td>
+                    <td>{p.grade || '-'}</td>
+                    <td>{p.pre}</td>
+                    <td><strong>{p.post}</strong></td>
+                    <td className={p.delta > 0 ? 'delta-positive' : p.delta < 0 ? 'delta-negative' : ''}>
+                      {p.delta > 0 ? '+' : ''}{p.delta}
+                    </td>
+                    <td style={{ fontSize: '0.8rem' }}>
+                      {pct > 0 ? `+${pct}%` : `${pct}%`}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
   )
 }

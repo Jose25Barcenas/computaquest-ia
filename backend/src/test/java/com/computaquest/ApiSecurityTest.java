@@ -134,4 +134,37 @@ class ApiSecurityTest {
                                 Map.of("email", "nadie-" + UUID.randomUUID() + "@example.com"))))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void adminStatsWithoutTokenReturns401() throws Exception {
+        mockMvc.perform(get("/api/admin/stats"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void surveyComparisonWithoutTokenReturns401() throws Exception {
+        mockMvc.perform(get("/api/surveys/compare"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void adminStatsForbiddenForStudents() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setName("Student Only");
+        request.setEmail("student-" + UUID.randomUUID() + "@example.com");
+        request.setPassword("password123");
+        request.setGrade("8");
+        String body = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String token = objectMapper.readTree(body).get("token").asText();
+
+        mockMvc.perform(get("/api/admin/stats").header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/api/surveys/compare").header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+    }
 }

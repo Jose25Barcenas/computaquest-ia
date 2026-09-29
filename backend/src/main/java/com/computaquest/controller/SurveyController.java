@@ -58,4 +58,10 @@ public class SurveyController {
     public ResponseEntity<List<SurveyDTO>> getAllSurveys() {
         return ResponseEntity.ok(surveyService.getAllSurveys());
     }
+
+    @GetMapping("/compare")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<com.computaquest.dto.SurveyComparisonDTO> getComparison() {
+        return ResponseEntity.ok(surveyService.getComparison());
+    }
 }
