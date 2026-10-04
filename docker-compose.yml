@@ -18,7 +18,7 @@ services:
       - "4000:4000"
     environment:
       MONGODB_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-admin123}@mongodb:27017/computaquest?authSource=admin
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatorio - genera uno con: openssl rand -hex 32}
+      JWT_SECRET: "${JWT_SECRET:?JWT_SECRET es obligatorio - genera uno con openssl rand -hex 32}"
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       CORS_ALLOWED_ORIGINS: http://localhost:3000
     depends_on:
