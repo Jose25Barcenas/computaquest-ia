@@ -1,6 +1,9 @@
 package com.computaquest.service;
 
 import com.computaquest.dto.SurveyComparisonDTO;
+import com.computaquest.dto.SurveyDTO;
+import com.computaquest.dto.SurveyRequest;
+import com.computaquest.exception.ConflictException;
 import com.computaquest.model.Survey;
 import com.computaquest.repository.SurveyRepository;
 import org.junit.jupiter.api.Test;
@@ -10,10 +13,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -91,5 +97,42 @@ class SurveyServiceTest {
         assertEquals(0.0, result.getPreAverage());
         assertEquals(0.0, result.getAverageDelta());
         assertTrue(result.getPaired().isEmpty());
+    }
+
+    private SurveyRequest surveyRequest(String type) {
+        SurveyRequest request = new SurveyRequest();
+        request.setType(type);
+        request.setAge(13);
+        request.setGrade("8vo");
+        request.setGender("M");
+        Map<Integer, Integer> answers = new HashMap<>();
+        for (int i = 1; i <= 15; i++) answers.put(i, 4);
+        request.setAnswers(answers);
+        return request;
+    }
+
+    @Test
+    void submitRejectsDuplicateSurveyOfSameType() {
+        when(surveyRepository.findFirstByUserAndTypeOrderByCreatedAtDesc("a@test.com", "pre"))
+                .thenReturn(Optional.of(survey("a@test.com", "pre", 40, Instant.now())));
+
+        ConflictException ex = assertThrows(ConflictException.class,
+                () -> surveyService.submitSurvey("a@test.com", surveyRequest("pre")));
+
+        assertTrue(ex.getMessage().contains("Ya enviaste la encuesta pre"));
+    }
+
+    @Test
+    void submitAllowsFirstSurveyOfEachType() {
+        Survey savedPost = survey("a@test.com", "post", 50, Instant.now());
+
+        when(surveyRepository.findFirstByUserAndTypeOrderByCreatedAtDesc("a@test.com", "post"))
+                .thenReturn(Optional.empty());
+        when(surveyRepository.save(any(Survey.class))).thenReturn(savedPost);
+
+        SurveyDTO result = surveyService.submitSurvey("a@test.com", surveyRequest("post"));
+
+        assertEquals("post", result.getType());
+        assertEquals(50, result.getTotalScore());
     }
 }

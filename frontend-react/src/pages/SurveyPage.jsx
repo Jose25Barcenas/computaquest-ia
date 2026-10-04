@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useToast } from '../context/ToastContext'
 import api from '../services/api'
 
@@ -146,6 +146,19 @@ export default function SurveyPage() {
   const [answers, setAnswers] = useState({})
   const [result, setResult] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [userSurveys, setUserSurveys] = useState([])
+
+  useEffect(() => {
+    api.getUserSurveys()
+      .then(setUserSurveys)
+      .catch(() => {})
+  }, [])
+
+  const answered = (type) => userSurveys.some(s => s.type === type)
+  const answeredAt = (type) => {
+    const found = userSurveys.find(s => s.type === type)
+    return found?.createdAt ? new Date(found.createdAt).toLocaleDateString() : ''
+  }
 
   const handleDemographicChange = (field, value) => {
     setDemographicsData(prev => ({ ...prev, [field]: value }))
@@ -206,17 +219,41 @@ export default function SurveyPage() {
           <p><strong>Privacidad:</strong> Tus respuestas son anonimas y seran utilizadas solo con fines academicos.</p>
         </div>
         <div className="survey-type-grid">
-          <button className="btn-primary survey-type-btn" onClick={() => setSurveyType('pre')}>
-            <i className="fa-solid fa-play"></i>
-            <span>Encuesta Pre</span>
-            <small>Antes de iniciar los retos</small>
+          <button
+            className="btn-primary survey-type-btn"
+            disabled={answered('pre')}
+            onClick={() => setSurveyType('pre')}
+          >
+            <i className={`fa-solid ${answered('pre') ? 'fa-circle-check' : 'fa-play'}`}></i>
+            <span>{answered('pre') ? 'Encuesta Pre - Respondida' : 'Encuesta Pre'}</span>
+            <small>
+              {answered('pre')
+                ? `Respondida el ${answeredAt('pre')}`
+                : 'Antes de iniciar los retos'}
+            </small>
           </button>
-          <button className="btn-primary survey-type-btn" onClick={() => setSurveyType('post')}>
-            <i className="fa-solid fa-flag-checkered"></i>
-            <span>Encuesta Post</span>
-            <small>Despues de completar retos</small>
+          <button
+            className="btn-primary survey-type-btn"
+            disabled={answered('post')}
+            onClick={() => setSurveyType('post')}
+          >
+            <i className={`fa-solid ${answered('post') ? 'fa-circle-check' : 'fa-flag-checkered'}`}></i>
+            <span>{answered('post') ? 'Encuesta Post - Respondida' : 'Encuesta Post'}</span>
+            <small>
+              {answered('post')
+                ? `Respondida el ${answeredAt('post')}`
+                : 'Despues de completar retos'}
+            </small>
           </button>
         </div>
+        {answered('pre') && answered('post') && (
+          <div className="survey-info glass-panel">
+            <p>
+              <i className="fa-solid fa-circle-check"></i>{' '}
+              Ya respondiste las encuestas pre y post. Gracias por participar en la investigacion.
+            </p>
+          </div>
+        )}
       </div>
     )
   }
