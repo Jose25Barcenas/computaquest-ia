@@ -79,6 +79,10 @@ const api = {
 
   getAdminStats: () => request('/admin/stats'),
 
+  getAdminChallengeStats: () => request('/admin/challenge-stats'),
+
+  getAdminActivity: () => request('/admin/activity'),
+
   getSurveyComparison: () => request('/surveys/compare'),
 
   submitSurvey: (data) => request('/surveys', { method: 'POST', body: JSON.stringify(data) }),

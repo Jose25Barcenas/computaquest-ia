@@ -2,6 +2,18 @@ import { useState, useEffect } from 'react'
 import api from '../services/api'
 import { useToast } from '../context/ToastContext'
 
+const timeAgo = (iso) => {
+  if (!iso) return ''
+  const diff = Date.now() - new Date(iso).getTime()
+  const min = Math.floor(diff / 60000)
+  if (min < 1) return 'ahora mismo'
+  if (min < 60) return `hace ${min} min`
+  const hours = Math.floor(min / 60)
+  if (hours < 24) return `hace ${hours} h`
+  const days = Math.floor(hours / 24)
+  return `hace ${days} d`
+}
+
 export default function AdminPage() {
   const [tab, setTab] = useState('overview')
   const [users, setUsers] = useState([])
@@ -9,6 +21,8 @@ export default function AdminPage() {
   const [surveys, setSurveys] = useState([])
   const [stats, setStats] = useState(null)
   const [comparison, setComparison] = useState(null)
+  const [challengeStats, setChallengeStats] = useState([])
+  const [activity, setActivity] = useState([])
   const [loading, setLoading] = useState(true)
   const toast = useToast()
 
@@ -27,18 +41,22 @@ export default function AdminPage() {
 
   const loadData = async () => {
     try {
-      const [usersData, challengesData, surveysData, statsData, comparisonData] = await Promise.all([
+      const [usersData, challengesData, surveysData, statsData, comparisonData, challengeStatsData, activityData] = await Promise.all([
         api.getUsers(),
         api.getChallenges(),
         api.getAllSurveys(),
         api.getAdminStats().catch(() => null),
         api.getSurveyComparison().catch(() => null),
+        api.getAdminChallengeStats().catch(() => []),
+        api.getAdminActivity().catch(() => []),
       ])
       setUsers(Array.isArray(usersData) ? usersData : usersData?.users || [])
       setChallenges(Array.isArray(challengesData) ? challengesData : [])
       setSurveys(Array.isArray(surveysData) ? surveysData : [])
       setStats(statsData)
       setComparison(comparisonData)
+      setChallengeStats(Array.isArray(challengeStatsData) ? challengeStatsData : [])
+      setActivity(Array.isArray(activityData) ? activityData : [])
     } catch {
       toast.error('Error al cargar datos')
     } finally {
@@ -195,6 +213,64 @@ export default function AdminPage() {
             <div className="kpi-sub">Con pre-test y post-test</div>
           </div>
         </div>
+      )}
+
+      {tab === 'overview' && (
+        <>
+          <div className="admin-table glass-panel">
+            <h3><i className="fa-solid fa-chart-column"></i> Rendimiento por reto</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Reto</th>
+                  <th>Completados</th>
+                  <th>Intentos</th>
+                  <th>Puntaje prom.</th>
+                  <th>Tasa de finalizacion</th>
+                </tr>
+              </thead>
+              <tbody>
+                {challengeStats.length === 0 && (
+                  <tr><td colSpan={5} style={{color: 'var(--text-muted)'}}>Sin datos todavia</td></tr>
+                )}
+                {challengeStats.map(s => (
+                  <tr key={s.challengeId}>
+                    <td>{s.title}</td>
+                    <td>{s.uniqueCompletions}</td>
+                    <td>{s.attempts}</td>
+                    <td>{s.avgScore}</td>
+                    <td>
+                      <div className="rate-bar">
+                        <div className="rate-bar-track">
+                          <div className="rate-bar-fill" style={{width: `${s.completionRate}%`}}></div>
+                        </div>
+                        <span>{s.completionRate}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="glass-panel activity-panel">
+            <h3><i className="fa-solid fa-clock-rotate-left"></i> Actividad reciente</h3>
+            {activity.length === 0 ? (
+              <p style={{color: 'var(--text-muted)'}}>Sin actividad todavia</p>
+            ) : (
+              <ul className="activity-list">
+                {activity.map((a, i) => (
+                  <li key={`${a.at}-${i}`}>
+                    <i className={`fa-solid ${a.type === 'SURVEY' ? 'fa-clipboard-list' : 'fa-gamepad'}`}></i>
+                    <span className="activity-user">{a.user}</span>
+                    <span>{a.detail}</span>
+                    <time>{timeAgo(a.at)}</time>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
       )}
 
       {tab === 'results' && (

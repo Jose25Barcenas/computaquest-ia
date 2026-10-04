@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
+import { homePathFor } from '../../constants'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
@@ -19,7 +20,7 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <Link to={user ? '/dashboard' : '/'} className="logo-area" onClick={closeMenu}>
+      <Link to={user ? homePathFor(user) : '/'} className="logo-area" onClick={closeMenu}>
         <i className="fa-solid fa-brain"></i> ComputaQuest IA
       </Link>
 
@@ -37,19 +38,22 @@ export default function Navbar() {
       <div className={`nav-controls ${menuOpen ? 'nav-open' : ''}`}>
         {user && (
           <>
-            <Link to="/dashboard" className="nav-link" onClick={closeMenu}>
-              <i className="fa-solid fa-house"></i> Inicio
-            </Link>
-            <Link to="/challenges" className="nav-link" onClick={closeMenu}>
-              <i className="fa-solid fa-gamepad"></i> Retos
-            </Link>
-            <Link to="/survey" className="nav-link" onClick={closeMenu}>
-              <i className="fa-solid fa-clipboard-list"></i> Encuesta
-            </Link>
-            {user.role === 'ADMIN' && (
+            {user.role === 'ADMIN' ? (
               <Link to="/admin" className="nav-link" onClick={closeMenu}>
-                <i className="fa-solid fa-gear"></i> Admin
+                <i className="fa-solid fa-gear"></i> Panel Admin
               </Link>
+            ) : (
+              <>
+                <Link to="/dashboard" className="nav-link" onClick={closeMenu}>
+                  <i className="fa-solid fa-house"></i> Inicio
+                </Link>
+                <Link to="/challenges" className="nav-link" onClick={closeMenu}>
+                  <i className="fa-solid fa-gamepad"></i> Retos
+                </Link>
+                <Link to="/survey" className="nav-link" onClick={closeMenu}>
+                  <i className="fa-solid fa-clipboard-list"></i> Encuesta
+                </Link>
+              </>
             )}
             <span className="nav-user">
               <img

@@ -39,3 +39,5 @@ export const TYPE_INFO = {
 export const getTypeInfo = (type) => TYPE_INFO[String(type || '').toLowerCase()] || {}
 
 export const MODULES = Object.values(CHALLENGE_TYPES)
+
+export const homePathFor = (user) => (user?.role === 'ADMIN' ? '/admin' : '/dashboard')

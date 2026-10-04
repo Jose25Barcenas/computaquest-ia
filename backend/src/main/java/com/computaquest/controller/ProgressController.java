@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +32,7 @@ public class ProgressController {
     }
 
     @PostMapping("/complete")
+    @PreAuthorize("hasRole('STUDENT')")
     @Operation(summary = "Completar reto", description = "Registra la finalizacion de un reto y otorga recompensas")
     public ResponseEntity<ProgressDTO> completeChallenge(
             Authentication authentication,

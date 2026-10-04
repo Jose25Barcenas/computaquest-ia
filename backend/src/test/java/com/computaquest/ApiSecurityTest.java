@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 /**
  * Blindaje de la superficie publica/privada de la API:
@@ -165,6 +166,29 @@ class ApiSecurityTest {
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(get("/api/surveys/compare").header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adminCannotCompleteChallenges() throws Exception {
+        mockMvc.perform(post("/api/progress/complete")
+                        .with(user("admin-only").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("challengeId", "no-importa"))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void adminCannotSubmitSurveys() throws Exception {
+        mockMvc.perform(post("/api/surveys")
+                        .with(user("admin-only").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "type", "pre",
+                                "age", 12,
+                                "grade", "8vo",
+                                "gender", "M",
+                                "answers", Map.of("1", 3)))))
                 .andExpect(status().isForbidden());
     }
 }

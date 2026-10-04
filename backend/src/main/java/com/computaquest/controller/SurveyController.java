@@ -21,6 +21,7 @@ public class SurveyController {
     private final SurveyService surveyService;
 
     @PostMapping
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<SurveyDTO> submitSurvey(
             Authentication authentication,
             @Valid @RequestBody SurveyRequest request) {
