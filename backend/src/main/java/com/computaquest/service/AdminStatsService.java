@@ -9,10 +9,12 @@ import com.computaquest.model.Progress;
 import com.computaquest.model.Survey;
 import com.computaquest.model.User;
 import com.computaquest.repository.ChallengeRepository;
+import com.computaquest.repository.ChatRepository;
 import com.computaquest.repository.ProgressRepository;
 import com.computaquest.repository.SurveyRepository;
 import com.computaquest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminStatsService {
@@ -31,6 +34,7 @@ public class AdminStatsService {
     private final ChallengeRepository challengeRepository;
     private final ProgressRepository progressRepository;
     private final SurveyRepository surveyRepository;
+    private final ChatRepository chatRepository;
 
     public AdminStatsDTO getStats() {
         long studentsTotal = userRepository.countByRole(Role.STUDENT);
@@ -140,5 +144,24 @@ public class AdminStatsService {
 
         events.sort(Comparator.comparing(ActivityDTO::getAt).reversed());
         return events.stream().limit(size).toList();
+    }
+
+    // Deja la BD en cero para una nueva sesion de investigacion: borra encuestas,
+    // progreso de retos y chats. No toca usuarios ni el contenido de los retos.
+    public Map<String, Long> resetStudentData() {
+        long surveys = surveyRepository.count();
+        long progress = progressRepository.count();
+        long chats = chatRepository.count();
+
+        surveyRepository.deleteAll();
+        progressRepository.deleteAll();
+        chatRepository.deleteAll();
+
+        log.warn("RESET de datos de estudiantes: {} encuestas, {} progresos, {} chats eliminados",
+                surveys, progress, chats);
+        return Map.of(
+                "surveysDeleted", surveys,
+                "progressDeleted", progress,
+                "chatsDeleted", chats);
     }
 }

@@ -8,6 +8,7 @@ import com.computaquest.model.Challenge;
 import com.computaquest.model.Progress;
 import com.computaquest.model.Survey;
 import com.computaquest.model.User;
+import com.computaquest.repository.ChatRepository;
 import com.computaquest.repository.ChallengeRepository;
 import com.computaquest.repository.ProgressRepository;
 import com.computaquest.repository.SurveyRepository;
@@ -21,8 +22,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +39,8 @@ class AdminStatsServiceTest {
     private ProgressRepository progressRepository;
     @Mock
     private SurveyRepository surveyRepository;
+    @Mock
+    private ChatRepository chatRepository;
 
     @InjectMocks
     private AdminStatsService adminStatsService;
@@ -149,5 +154,21 @@ class AdminStatsServiceTest {
 
         assertEquals(50, activity.size());
         assertEquals("CHALLENGE", activity.get(0).getType());
+    }
+
+    @Test
+    void resetStudentDataBorraEncuestasProgresoYChats() {
+        when(surveyRepository.count()).thenReturn(6L);
+        when(progressRepository.count()).thenReturn(2L);
+        when(chatRepository.count()).thenReturn(1L);
+
+        Map<String, Long> result = adminStatsService.resetStudentData();
+
+        assertEquals(6L, result.get("surveysDeleted"));
+        assertEquals(2L, result.get("progressDeleted"));
+        assertEquals(1L, result.get("chatsDeleted"));
+        verify(surveyRepository).deleteAll();
+        verify(progressRepository).deleteAll();
+        verify(chatRepository).deleteAll();
     }
 }

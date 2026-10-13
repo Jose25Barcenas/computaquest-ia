@@ -191,4 +191,28 @@ class ApiSecurityTest {
                                 "answers", Map.of("1", 3)))))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void adminResetDataWithoutTokenReturns401() throws Exception {
+        mockMvc.perform(delete("/api/admin/reset-data"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void adminResetDataForbiddenForStudents() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setName("Student Only");
+        request.setEmail("student-" + UUID.randomUUID() + "@example.com");
+        request.setPassword("password123");
+        request.setGrade("8");
+        String body = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String token = objectMapper.readTree(body).get("token").asText();
+
+        mockMvc.perform(delete("/api/admin/reset-data").header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
+    }
 }

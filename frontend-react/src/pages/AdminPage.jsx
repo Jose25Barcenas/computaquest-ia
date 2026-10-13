@@ -79,6 +79,18 @@ export default function AdminPage() {
     }
   }
 
+  const handleResetData = async () => {
+    const ok = confirm('¿Borrar TODAS las encuestas, el progreso y los chats? No se puede deshacer.')
+    if (!ok) return
+    try {
+      const res = await api.resetAdminData()
+      toast.success(`Datos borrados: ${res.surveysDeleted} encuestas, ${res.progressDeleted} progresos, ${res.chatsDeleted} chats`)
+      loadData()
+    } catch (e) {
+      toast.error(e.message || 'Error al reiniciar datos')
+    }
+  }
+
   const handleDeleteChallenge = async (id) => {
     if (!confirm('¿Eliminar este reto?')) return
     try {
@@ -173,6 +185,14 @@ export default function AdminPage() {
           <i className="fa-solid fa-clipboard-list"></i> Encuestas ({surveys.length})
         </button>
       </div>
+
+      {tab === 'overview' && (
+        <div className="admin-toolbar">
+          <button className="btn-danger btn-sm" onClick={handleResetData}>
+            <i className="fa-solid fa-broom"></i> Reiniciar datos de la sesion
+          </button>
+        </div>
+      )}
 
       {tab === 'overview' && (
         <div className="kpi-grid">

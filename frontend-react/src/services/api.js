@@ -83,6 +83,8 @@ const api = {
 
   getAdminActivity: () => request('/admin/activity'),
 
+  resetAdminData: () => request('/admin/reset-data', { method: 'DELETE' }),
+
   getSurveyComparison: () => request('/surveys/compare'),
 
   submitSurvey: (data) => request('/surveys', { method: 'POST', body: JSON.stringify(data) }),
