@@ -103,6 +103,8 @@ npm run dev
 | `SPRING_MAIL_PORT` / `SPRING_MAIL_USERNAME` / `SPRING_MAIL_PASSWORD` | Credenciales SMTP | - |
 | `MAIL_FROM` | Remitiente de los emails | `noreply@computaquest.app` |
 | `TRUST_PROXY` | `true` solo detrás de un proxy (nginx/Railway) | `false` |
+| `APP_RATE_LIMIT_MAX_PER_MINUTE` (`app.rate-limit.max-per-minute`) | Peticiones máx/min por IP en `/api/auth/*`; `<=0` lo desactiva | `60` |
+| `APP_RATE_LIMIT_ENABLED` (`app.rate-limit.enabled`) | Activa el rate limit de autenticación | `true` |
 
 ## Credenciales de Prueba
 

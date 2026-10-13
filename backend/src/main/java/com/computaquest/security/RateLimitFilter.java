@@ -18,7 +18,6 @@ import java.time.Instant;
 @Order(1)
 public class RateLimitFilter implements Filter {
 
-    private static final int MAX_REQUESTS_PER_MINUTE = 20;
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<Instant>> requestCounts = new ConcurrentHashMap<>();
 
     // Solo confiar en X-Forwarded-For cuando hay un proxy delante (nginx/Railway);
@@ -28,6 +27,11 @@ public class RateLimitFilter implements Filter {
 
     @org.springframework.beans.factory.annotation.Value("${app.rate-limit.enabled:true}")
     private boolean enabled;
+
+    // 20/min no alcanza para un salon donde 15 alumnos registran y cargan su perfil
+    // al mismo tiempo; <=0 desactiva el limite
+    @org.springframework.beans.factory.annotation.Value("${app.rate-limit.max-per-minute:60}")
+    private int maxRequestsPerMinute;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -55,7 +59,7 @@ public class RateLimitFilter implements Filter {
             timestamps = requestCounts.computeIfAbsent(clientIp, k -> new CopyOnWriteArrayList<>());
         }
 
-        if (timestamps.size() >= MAX_REQUESTS_PER_MINUTE) {
+        if (maxRequestsPerMinute > 0 && timestamps.size() >= maxRequestsPerMinute) {
             log.warn("Rate limit exceeded for IP: {} on path: {}", clientIp, path);
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType("application/json");
