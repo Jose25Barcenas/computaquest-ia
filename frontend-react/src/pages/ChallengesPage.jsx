@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useToast } from '../context/ToastContext'
 import api from '../services/api'
@@ -13,7 +13,7 @@ export default function ChallengesPage() {
   const typeFilter = searchParams.get('type')
   const toast = useToast()
 
-  const loadChallenges = async () => {
+  const loadChallenges = useCallback(async () => {
     setLoading(true)
     setError(false)
     try {
@@ -26,11 +26,11 @@ export default function ChallengesPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [typeFilter, toast])
 
   useEffect(() => {
     loadChallenges()
-  }, [typeFilter])
+  }, [loadChallenges])
 
   const difficultyStars = (n) => {
     return Array.from({ length: 5 }, (_, i) => (

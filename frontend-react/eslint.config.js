@@ -27,7 +27,10 @@ export default [
     rules: {
       ...reactHooks.configs.recommended.rules,
       'react-hooks/set-state-in-effect': 'off',
-      'react-refresh/only-export-components': 'warn',
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowExportNames: ['useAuth', 'useTheme', 'useToast'] },
+      ],
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },

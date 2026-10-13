@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import api from '../services/api'
 import { useToast } from '../context/ToastContext'
 
@@ -39,7 +39,7 @@ export default function AdminPage() {
 
   const [contentError, setContentError] = useState('')
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [usersData, challengesData, surveysData, statsData, comparisonData, challengeStatsData, activityData] = await Promise.all([
         api.getUsers(),
@@ -62,11 +62,11 @@ export default function AdminPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [loadData])
 
   const handleDeleteUser = async (id) => {
     if (!confirm('¿Eliminar este usuario?')) return

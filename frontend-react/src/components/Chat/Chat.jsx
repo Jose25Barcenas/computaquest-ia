@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useToast } from '../../context/ToastContext'
 import api from '../../services/api'
 
@@ -11,18 +11,18 @@ export default function Chat() {
   const messagesEndRef = useRef(null)
   const toast = useToast()
 
-  const loadChats = async () => {
+  const loadChats = useCallback(async () => {
     try {
       const data = await api.getUserChats()
       setChats(data)
     } catch {
       toast.error('Error al cargar chats')
     }
-  }
+  }, [toast])
 
   useEffect(() => {
     loadChats()
-  }, [])
+  }, [loadChats])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

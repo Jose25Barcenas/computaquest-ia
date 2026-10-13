@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -12,7 +12,7 @@ export default function DashboardPage() {
   const [progress, setProgress] = useState([])
   const [leaderboard, setLeaderboard] = useState([])
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [progressData, leaderboardData] = await Promise.all([
         api.getProgress(),
@@ -23,11 +23,11 @@ export default function DashboardPage() {
     } catch {
       toast.error('Error al cargar datos del dashboard')
     }
-  }
+  }, [toast])
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [loadData])
 
   const completedCount = progress.filter(p => p.completed).length
 

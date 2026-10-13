@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import Toast from '../components/Toast/Toast'
 
 const ToastContext = createContext(null)
@@ -8,9 +8,10 @@ export function ToastProvider({ children }) {
   const timersRef = useRef(new Set())
 
   useEffect(() => {
+    const timers = timersRef.current
     return () => {
-      timersRef.current.forEach(timerId => clearTimeout(timerId))
-      timersRef.current.clear()
+      timers.forEach(timerId => clearTimeout(timerId))
+      timers.clear()
     }
   }, [])
 
@@ -28,8 +29,10 @@ export function ToastProvider({ children }) {
   const error = useCallback((msg) => addToast(msg, 'error'), [addToast])
   const info = useCallback((msg) => addToast(msg, 'info'), [addToast])
 
+  const value = useMemo(() => ({ success, error, info }), [success, error, info])
+
   return (
-    <ToastContext.Provider value={{ success, error, info }}>
+    <ToastContext.Provider value={value}>
       {children}
       <div className="toast-container">
         {toasts.map(toast => (

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import api, { setOnUnauthorized } from '../services/api'
 
 const AuthContext = createContext(null)
@@ -37,24 +37,29 @@ export function AuthProvider({ children }) {
     return () => controller.abort()
   }, [])
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     const data = await api.login({ email, password })
     localStorage.setItem('computaquest_token', data.token)
     setUser(data)
     return data
-  }
+  }, [])
 
-  const register = async (name, email, password, avatar, grade) => {
+  const register = useCallback(async (name, email, password, avatar, grade) => {
     const data = await api.register({ name, email, password, avatar, grade })
     return data
-  }
+  }, [])
 
-  const updateUser = (userData) => {
+  const updateUser = useCallback((userData) => {
     setUser(prev => ({ ...prev, ...userData }))
-  }
+  }, [])
+
+  const value = useMemo(
+    () => ({ user, loading, login, register, logout, updateUser }),
+    [user, loading, login, register, logout, updateUser]
+  )
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )

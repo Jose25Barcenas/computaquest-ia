@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import api from '../../services/api'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
@@ -8,18 +8,18 @@ export default function Leaderboard() {
   const { user } = useAuth()
   const toast = useToast()
 
-  const loadLeaderboard = async () => {
+  const loadLeaderboard = useCallback(async () => {
     try {
       const data = await api.getLeaderboard()
       setEntries(data)
     } catch {
       toast.error('Error al cargar leaderboard')
     }
-  }
+  }, [toast])
 
   useEffect(() => {
     loadLeaderboard()
-  }, [])
+  }, [loadLeaderboard])
 
   const positionIcons = ['fa-crown', 'fa-medal', 'fa-award']
 
