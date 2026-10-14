@@ -209,6 +209,12 @@ Cualquier endpoint no listado en las secciones "No" devuelve **401 sin token** y
 - **Infra:** Docker, Docker Compose, Railway, Nginx
 - **Pruebas:** JUnit 5, MockMvc + Spring Security Test, Mockito, MongoDB embebido (Flapdoodle), Vitest + Testing Library
 
+## Despliegue
+
+- **Frontend:** Netlify redespliega solo con cada push a `main`.
+- **Backend:** Railway conectado al repo (Root Directory: `backend`) con "Deploy on push". Si no dispara, se sube manual con `railway up -d`.
+- **Local:** `git pull` y luego `docker compose up -d --build` para reflejar los cambios.
+
 ## Autor
 
 - Jose Armando Barcenas González
