@@ -9,6 +9,8 @@ import ChallengePage from './pages/ChallengePage'
 import AdminPage from './pages/AdminPage'
 import SurveyPage from './pages/SurveyPage'
 import QuickAccessPage from './pages/QuickAccessPage'
+import PilotPage from './pages/pilot/PilotPage'
+import PilotExpertPage from './pages/pilot/PilotExpertPage'
 
 function ProtectedRoute({ children, adminOnly = false, studentOnly = false }) {
   const { user, loading } = useAuth()
@@ -45,6 +47,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="/access" element={<QuickAccessPage />} />
+          <Route path="/pilot" element={<PilotPage />} />
+          <Route path="/pilot/docente" element={<PilotExpertPage />} />
           <Route path="/dashboard" element={<ProtectedRoute studentOnly><DashboardPage /></ProtectedRoute>} />
           <Route path="/challenges" element={<ProtectedRoute studentOnly><ChallengesPage /></ProtectedRoute>} />
           <Route path="/challenge/:id" element={<ProtectedRoute studentOnly><ChallengePage /></ProtectedRoute>} />

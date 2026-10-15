@@ -91,6 +91,24 @@ export default function AdminPage() {
     }
   }
 
+  const handleExportPilot = async () => {
+    try {
+      await api.exportPilotCsv()
+      toast.success('CSV del piloto descargado')
+    } catch {
+      toast.error('Error al exportar el CSV')
+    }
+  }
+
+  const handleExportPilotExpert = async () => {
+    try {
+      await api.exportPilotExpertCsv()
+      toast.success('CSV de validación descargado')
+    } catch {
+      toast.error('Error al exportar el CSV')
+    }
+  }
+
   const handleDeleteChallenge = async (id) => {
     if (!confirm('¿Eliminar este reto?')) return
     try {
@@ -188,6 +206,12 @@ export default function AdminPage() {
 
       {tab === 'overview' && (
         <div className="admin-toolbar">
+          <button className="btn-secondary btn-sm" onClick={handleExportPilot}>
+            <i className="fa-solid fa-file-csv"></i> Exportar piloto (CSV)
+          </button>
+          <button className="btn-secondary btn-sm" onClick={handleExportPilotExpert}>
+            <i className="fa-solid fa-file-csv"></i> Exportar validación docente (CSV)
+          </button>
           <button className="btn-danger btn-sm" onClick={handleResetData}>
             <i className="fa-solid fa-broom"></i> Reiniciar datos de la sesion
           </button>

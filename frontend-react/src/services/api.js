@@ -48,6 +48,29 @@ async function request(endpoint, options = {}) {
   return text ? JSON.parse(text) : null
 }
 
+async function downloadCsv(endpoint, filename) {
+  const token = getToken()
+  const headers = {}
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const response = await fetch(`${API_BASE}${endpoint}`, { headers })
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
+    throw new Error(body?.message || 'Error al descargar el archivo')
+  }
+
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
 const api = {
   register: (data) => request('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
   login: (data) => request('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
@@ -93,6 +116,14 @@ const api = {
   getSurveyStats: (type) => request(`/surveys/stats?type=${type}`),
   getSurveyStatsByDemographic: (type, demographic) => request(`/surveys/stats/${demographic}?type=${type}`),
   getAllSurveys: () => request('/surveys/all'),
+
+  pilotGetSession: (code) => request(`/pilot/session?code=${encodeURIComponent(code)}`),
+  pilotSubmitTest: (data) => request('/pilot/test', { method: 'POST', body: JSON.stringify(data) }),
+  pilotSubmitMotivation: (data) => request('/pilot/motivation', { method: 'POST', body: JSON.stringify(data) }),
+  pilotSubmitExpert: (data) => request('/pilot/expert', { method: 'POST', body: JSON.stringify(data) }),
+
+  exportPilotCsv: () => downloadCsv('/admin/pilot/export.csv', 'piloto-resultados.csv'),
+  exportPilotExpertCsv: () => downloadCsv('/admin/pilot/export-experto.csv', 'piloto-validacion-docente.csv'),
 }
 
 export default api
