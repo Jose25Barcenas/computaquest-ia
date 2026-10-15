@@ -177,6 +177,24 @@ class PilotServiceTest {
     }
 
     @Test
+    void deleteSessionBorraPorCodigo() {
+        PilotSession session = new PilotSession();
+        session.setCode("P09");
+        when(pilotSessionRepository.findByCode("P09")).thenReturn(Optional.of(session));
+
+        pilotService.deleteSession("p09");
+
+        org.mockito.Mockito.verify(pilotSessionRepository).delete(session);
+    }
+
+    @Test
+    void deleteSessionInexistenteLanzaError() {
+        when(pilotSessionRepository.findByCode("P09")).thenReturn(Optional.empty());
+
+        assertThrows(ValidationAppException.class, () -> pilotService.deleteSession("P09"));
+    }
+
+    @Test
     void exportParticipantsCsvIncluyeFilaPorParticipante() {
         PilotSession session = new PilotSession();
         session.setCode("P01");

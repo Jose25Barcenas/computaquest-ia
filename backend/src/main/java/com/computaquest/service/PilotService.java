@@ -125,6 +125,13 @@ public class PilotService {
         return pilotExpertReviewRepository.save(review);
     }
 
+    public void deleteSession(String code) {
+        String normalized = normalizeCode(code);
+        PilotSession session = pilotSessionRepository.findByCode(normalized)
+                .orElseThrow(() -> new ValidationAppException("No existe ninguna sesion con el codigo " + normalized));
+        pilotSessionRepository.delete(session);
+    }
+
     public String exportParticipantsCsv() {
         StringBuilder csv = new StringBuilder("\uFEFF");
         csv.append(String.join(",",

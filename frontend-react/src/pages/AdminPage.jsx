@@ -109,6 +109,17 @@ export default function AdminPage() {
     }
   }
 
+  const handleDeletePilotSession = async () => {
+    const code = prompt('¿Qué sesión del piloto quieres borrar? (ej. P09)')
+    if (!code || !code.trim()) return
+    try {
+      await api.deletePilotSession(code.trim())
+      toast.success(`Sesión ${code.trim().toUpperCase()} borrada`)
+    } catch (e) {
+      toast.error(e.message || 'Error al borrar la sesión')
+    }
+  }
+
   const handleDeleteChallenge = async (id) => {
     if (!confirm('¿Eliminar este reto?')) return
     try {
@@ -211,6 +222,9 @@ export default function AdminPage() {
           </button>
           <button className="btn-secondary btn-sm" onClick={handleExportPilotExpert}>
             <i className="fa-solid fa-file-csv"></i> Exportar validación docente (CSV)
+          </button>
+          <button className="btn-secondary btn-sm" onClick={handleDeletePilotSession}>
+            <i className="fa-solid fa-trash"></i> Borrar sesión piloto
           </button>
           <button className="btn-danger btn-sm" onClick={handleResetData}>
             <i className="fa-solid fa-broom"></i> Reiniciar datos de la sesion

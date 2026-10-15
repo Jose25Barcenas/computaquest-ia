@@ -124,6 +124,7 @@ const api = {
 
   exportPilotCsv: () => downloadCsv('/admin/pilot/export.csv', 'piloto-resultados.csv'),
   exportPilotExpertCsv: () => downloadCsv('/admin/pilot/export-experto.csv', 'piloto-validacion-docente.csv'),
+  deletePilotSession: (code) => request(`/admin/pilot/sessions?code=${encodeURIComponent(code)}`, { method: 'DELETE' }),
 }
 
 export default api
