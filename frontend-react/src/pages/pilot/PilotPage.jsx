@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import { TEST_QUESTIONS, MOTIVATION_ITEMS, LIKERT_OPTIONS, PILLAR_LABELS } from './pilotInstrument'
 
+const CODE_KEY = 'pilot_code'
+
 export default function PilotPage() {
-  const [code, setCode] = useState('')
+  const [code, setCode] = useState(() => localStorage.getItem(CODE_KEY) || '')
   const [codeError, setCodeError] = useState('')
   const [session, setSession] = useState(null)
   const [current, setCurrent] = useState('code') // code | hub | test | motivation
@@ -13,7 +15,31 @@ export default function PilotPage() {
   const [openAnswer, setOpenAnswer] = useState('')
   const [loading, setLoading] = useState(false)
   const [notice, setNotice] = useState('')
+  const [booting, setBooting] = useState(() => Boolean(localStorage.getItem(CODE_KEY)))
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const saved = localStorage.getItem(CODE_KEY)
+    if (!saved) {
+      setBooting(false)
+      return
+    }
+    let cancelled = false
+    api.pilotGetSession(saved)
+      .then((data) => {
+        if (!cancelled) {
+          setSession(data)
+          setCurrent('hub')
+        }
+      })
+      .catch(() => {
+        if (!cancelled) localStorage.removeItem(CODE_KEY)
+      })
+      .finally(() => {
+        if (!cancelled) setBooting(false)
+      })
+    return () => { cancelled = true }
+  }, [])
 
   async function enterCode(e) {
     e.preventDefault()
@@ -27,6 +53,7 @@ export default function PilotPage() {
     setNotice('')
     try {
       const data = await api.pilotGetSession(clean)
+      localStorage.setItem(CODE_KEY, clean)
       setSession(data)
       setCurrent('hub')
     } catch (err) {
@@ -34,6 +61,13 @@ export default function PilotPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  function changeCode() {
+    localStorage.removeItem(CODE_KEY)
+    setSession(null)
+    setCode('')
+    setCurrent('code')
   }
 
   function startTest() {
@@ -87,6 +121,10 @@ export default function PilotPage() {
 
   const allTestAnswered = TEST_QUESTIONS.every(q => answers[q.id])
   const allMotivationAnswered = MOTIVATION_ITEMS.every(q => answers[q.id])
+
+  if (booting) {
+    return <div className="loading-screen"><div className="spinner"></div></div>
+  }
 
   if (current === 'code') {
     return (
@@ -154,6 +192,12 @@ export default function PilotPage() {
             : <button className="btn-primary" onClick={() => { setAnswers({}); setCurrent('motivation') }} disabled={!session.postest}>
                 <i className="fa-solid fa-heart"></i> Responder motivación
               </button>}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+          <button className="btn-secondary" onClick={changeCode}>
+            <i className="fa-solid fa-right-from-bracket"></i> Cambiar de código
+          </button>
         </div>
       </div>
     )
