@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import api from '../../services/api'
 import { TEST_QUESTIONS, MOTIVATION_ITEMS, LIKERT_OPTIONS, PILLAR_LABELS } from './pilotInstrument'
 
@@ -146,7 +146,7 @@ export default function PilotPage() {
           </button>
         </form>
         <p className="survey-subtitle" style={{ marginTop: '1.5rem' }}>
-          ¿Eres el docente? <a href="/pilot/docente">Ir al formulario de validación</a>
+          ¿Eres el docente? <Link to="/pilot/docente">Ir al formulario de validación</Link>
         </p>
       </div>
     )
