@@ -7,10 +7,43 @@ import RadarChart from '../components/RadarChart/RadarChart'
 import { MODULES } from '../constants'
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
   const toast = useToast()
   const [progress, setProgress] = useState([])
   const [leaderboard, setLeaderboard] = useState([])
+  const [editingName, setEditingName] = useState(false)
+  const [nameValue, setNameValue] = useState('')
+  const [savingName, setSavingName] = useState(false)
+
+  const startEditName = () => {
+    setNameValue(user?.name || '')
+    setEditingName(true)
+  }
+
+  const cancelEditName = () => {
+    setNameValue('')
+    setEditingName(false)
+  }
+
+  const saveName = async () => {
+    const trimmed = nameValue.trim()
+    if (!trimmed) {
+      toast.error('El nombre no puede estar vacio')
+      return
+    }
+    setSavingName(true)
+    try {
+      const data = await api.updateProfile({ name: trimmed })
+      if (data?.token) localStorage.setItem('computaquest_token', data.token)
+      updateUser({ name: trimmed })
+      setEditingName(false)
+      toast.success('Nombre actualizado correctamente')
+    } catch {
+      toast.error('Error al actualizar el nombre')
+    } finally {
+      setSavingName(false)
+    }
+  }
 
   const loadData = useCallback(async () => {
     try {
@@ -46,7 +79,48 @@ export default function DashboardPage() {
               className="profile-avatar"
             />
             <div className="profile-info">
-              <h2>{user?.name}</h2>
+              {editingName ? (
+                <div className="name-edit-row">
+                  <input
+                    type="text"
+                    value={nameValue}
+                    onChange={e => setNameValue(e.target.value)}
+                    maxLength={50}
+                    autoFocus
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') saveName()
+                      if (e.key === 'Escape') cancelEditName()
+                    }}
+                  />
+                  <button
+                    className="btn-icon"
+                    onClick={saveName}
+                    disabled={savingName}
+                    title="Guardar"
+                  >
+                    <i className={`fa-solid ${savingName ? 'fa-spinner fa-spin' : 'fa-check'}`}></i>
+                  </button>
+                  <button
+                    className="btn-icon"
+                    onClick={cancelEditName}
+                    disabled={savingName}
+                    title="Cancelar"
+                  >
+                    <i className="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              ) : (
+                <div className="name-row">
+                  <h2>{user?.name}</h2>
+                  <button
+                    className="btn-icon"
+                    onClick={startEditName}
+                    title="Editar nombre"
+                  >
+                    <i className="fa-solid fa-pen"></i>
+                  </button>
+                </div>
+              )}
               <p className="profile-email">{user?.email}</p>
               <div className="profile-stats">
                 <div className="stat">

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import api from '../services/api'
+import { playClick, playFanfare } from '../utils/sounds'
 
 export default function LoginPage() {
   const [mode, setMode] = useState('login')
@@ -102,6 +103,7 @@ export default function LoginPage() {
     try {
       if (mode === 'login') {
         await login(email, password)
+        playFanfare()
         toast.success('¡Bienvenido de vuelta!')
       } else if (mode === 'register') {
         await register(name, email, password, avatar, grade)
@@ -227,7 +229,7 @@ export default function LoginPage() {
                   <div
                     key={av}
                     className={`avatar-option ${avatar === av ? 'selected' : ''}`}
-                    onClick={() => setAvatar(av)}
+                    onClick={() => { setAvatar(av); playClick() }}
                   >
                     <img src={`https://api.dicebear.com/7.x/bottts/svg?seed=${av}`} alt={av} />
                   </div>
