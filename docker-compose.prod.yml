@@ -24,7 +24,7 @@ services:
     container_name: computaquest-backend
     restart: always
     ports:
-      - "4000:4000"
+      - "127.0.0.1:4100:4000"
     environment:
       MONGODB_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:?MONGO_PASSWORD es obligatorio en produccion}@mongodb:27017/computaquest?authSource=admin
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es obligatorio en produccion}
