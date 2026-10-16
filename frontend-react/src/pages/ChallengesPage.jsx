@@ -4,6 +4,7 @@ import { useToast } from '../context/ToastContext'
 import api from '../services/api'
 import Leaderboard from '../components/Leaderboard/Leaderboard'
 import { getTypeInfo } from '../constants'
+import { playSelect } from '../utils/sounds'
 
 export default function ChallengesPage() {
   const [challenges, setChallenges] = useState([])
@@ -73,6 +74,7 @@ export default function ChallengesPage() {
                 to={`/challenge/${challenge.id}`}
                 className="challenge-card glass-panel"
                 style={{ '--card-accent': info.color }}
+                onClick={playSelect}
               >
                 <div className="challenge-header">
                   <div className="challenge-icon" style={{ background: info.color }}>
