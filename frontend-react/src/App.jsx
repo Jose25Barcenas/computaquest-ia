@@ -15,9 +15,11 @@ function ProtectedRoute({ children, adminOnly = false, studentOnly = false }) {
   const { user, loading } = useAuth()
 
   if (loading) return <div className="loading-screen"><div className="spinner"></div></div>
-  if (!user) return <Navigate to="/" />
-  if (adminOnly && user.role !== 'ADMIN') return <Navigate to="/dashboard" />
-  if (studentOnly && user.role === 'ADMIN') return <Navigate to="/admin" />
+
+  const hasToken = Boolean(localStorage.getItem('computaquest_token'))
+  if (!user || !hasToken) return <Navigate to="/" replace />
+  if (adminOnly && user.role !== 'ADMIN') return <Navigate to="/dashboard" replace />
+  if (studentOnly && user.role === 'ADMIN') return <Navigate to="/admin" replace />
 
   return children
 }
@@ -26,7 +28,9 @@ function PublicRoute({ children }) {
   const { user, loading } = useAuth()
 
   if (loading) return <div className="loading-screen"><div className="spinner"></div></div>
-  if (user) return <Navigate to={homePathFor(user)} />
+
+  const hasToken = Boolean(localStorage.getItem('computaquest_token'))
+  if (user && hasToken) return <Navigate to={homePathFor(user)} replace />
 
   return children
 }

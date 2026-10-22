@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [avatar, setAvatar] = useState('avatar1')
   const [grade, setGrade] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
   const [resetTokenSent, setResetTokenSent] = useState(false)
   const { login, register } = useAuth()
@@ -48,6 +49,7 @@ export default function LoginPage() {
     setGrade('')
     setAvatar('avatar1')
     setResetTokenSent(false)
+    setShowPassword(false)
   }
 
   const validateFields = () => {
@@ -196,15 +198,27 @@ export default function LoginPage() {
               </div>
               <div className="input-group">
                 <label>Contrasena</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={e => { setPassword(e.target.value); if (errors.password) setErrors(prev => ({ ...prev, password: '' })) }}
-                  placeholder="Minimo 6 caracteres"
-                  className={errors.password ? 'input-error' : ''}
-                  required
-                  minLength={6}
-                />
+                <div className="password-wrap">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); if (errors.password) setErrors(prev => ({ ...prev, password: '' })) }}
+                    placeholder="Minimo 6 caracteres"
+                    className={errors.password ? 'input-error' : ''}
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="pwd-toggle"
+                    onClick={() => setShowPassword(v => !v)}
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Ocultar contrasena' : 'Ver contrasena'}
+                    title={showPassword ? 'Ocultar contrasena' : 'Ver contrasena'}
+                  >
+                    <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                  </button>
+                </div>
                 {errors.password && <span className="field-error">{errors.password}</span>}
               </div>
 
@@ -264,14 +278,26 @@ export default function LoginPage() {
               </div>
               <div className="input-group">
                 <label>Contrasena</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={e => { setPassword(e.target.value); if (errors.password) setErrors(prev => ({ ...prev, password: '' })) }}
-                  placeholder="Tu contrasena"
-                  className={errors.password ? 'input-error' : ''}
-                  required
-                />
+                <div className="password-wrap">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); if (errors.password) setErrors(prev => ({ ...prev, password: '' })) }}
+                    placeholder="Tu contrasena"
+                    className={errors.password ? 'input-error' : ''}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="pwd-toggle"
+                    onClick={() => setShowPassword(v => !v)}
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Ocultar contrasena' : 'Ver contrasena'}
+                    title={showPassword ? 'Ocultar contrasena' : 'Ver contrasena'}
+                  >
+                    <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                  </button>
+                </div>
                 {errors.password && <span className="field-error">{errors.password}</span>}
               </div>
               <button type="submit" className="btn-primary btn-full" disabled={loading}>
@@ -342,15 +368,27 @@ export default function LoginPage() {
               </div>
               <div className="input-group">
                 <label>Nueva Contrasena</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={e => { setNewPassword(e.target.value); if (errors.newPassword) setErrors(prev => ({ ...prev, newPassword: '' })) }}
-                  placeholder="Minimo 6 caracteres"
-                  className={errors.newPassword ? 'input-error' : ''}
-                  required
-                  minLength={6}
-                />
+                <div className="password-wrap">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={e => { setNewPassword(e.target.value); if (errors.newPassword) setErrors(prev => ({ ...prev, newPassword: '' })) }}
+                    placeholder="Minimo 6 caracteres"
+                    className={errors.newPassword ? 'input-error' : ''}
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="pwd-toggle"
+                    onClick={() => setShowPassword(v => !v)}
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Ocultar contrasena' : 'Ver contrasena'}
+                    title={showPassword ? 'Ocultar contrasena' : 'Ver contrasena'}
+                  >
+                    <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                  </button>
+                </div>
                 {errors.newPassword && <span className="field-error">{errors.newPassword}</span>}
               </div>
               <button type="submit" className="btn-primary btn-full" disabled={loading}>
