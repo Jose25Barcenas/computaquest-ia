@@ -20,7 +20,7 @@ public class RateLimitFilter implements Filter {
 
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<Instant>> requestCounts = new ConcurrentHashMap<>();
 
-    // Solo confiar en X-Forwarded-For cuando hay un proxy delante (nginx/Railway);
+    // Solo confiar en X-Forwarded-For cuando hay un proxy (nginx) delante;
     // sin esto cualquier cliente puede cambiar de IP y eludir el limite
     @org.springframework.beans.factory.annotation.Value("${app.rate-limit.trust-proxy:false}")
     private boolean trustProxy;

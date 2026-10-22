@@ -1,16 +1,13 @@
 package com.computaquest.service;
 
-import com.computaquest.dto.PilotExpertRequest;
 import com.computaquest.dto.PilotMotivationRequest;
 import com.computaquest.dto.PilotTestRequest;
 import com.computaquest.exception.ValidationAppException;
 import com.computaquest.model.Chat;
-import com.computaquest.model.PilotExpertReview;
 import com.computaquest.model.PilotSession;
 import com.computaquest.model.Progress;
 import com.computaquest.model.User;
 import com.computaquest.repository.ChatRepository;
-import com.computaquest.repository.PilotExpertReviewRepository;
 import com.computaquest.repository.PilotSessionRepository;
 import com.computaquest.repository.ProgressRepository;
 import com.computaquest.repository.UserRepository;
@@ -43,15 +40,7 @@ public class PilotService {
     private static final List<String> PILLARS = List.of(
             "descomposicion", "reconocimiento_patrones", "algoritmos", "abstraccion");
 
-    private static final List<String> EXPERT_CRITERIA = List.of(
-            "pertinencia", "claridad", "dificultad", "retroalimentacion_ia",
-            "diseno_gamificado", "facilidad_uso", "aplicabilidad_aula");
-
-    private static final List<String> EXPERT_VERDICTS = List.of(
-            "aprobada", "aprobada_con_ajustes", "requiere_cambios");
-
     private final PilotSessionRepository pilotSessionRepository;
-    private final PilotExpertReviewRepository pilotExpertReviewRepository;
     private final UserRepository userRepository;
     private final ProgressRepository progressRepository;
     private final ChatRepository chatRepository;
@@ -101,30 +90,6 @@ public class PilotService {
         return pilotSessionRepository.save(session);
     }
 
-    public PilotExpertReview submitExpertReview(PilotExpertRequest request) {
-        if (request.getScores() == null) {
-            throw new ValidationAppException("Los criterios son requeridos");
-        }
-        Map<String, Integer> scores = new LinkedHashMap<>();
-        for (String criterion : EXPERT_CRITERIA) {
-            Integer value = request.getScores().get(criterion);
-            if (value == null || value < 1 || value > 5) {
-                throw new ValidationAppException("El criterio '" + criterion + "' debe estar entre 1 y 5");
-            }
-            scores.put(criterion, value);
-        }
-        if (!EXPERT_VERDICTS.contains(request.getVerdict())) {
-            throw new ValidationAppException("El veredicto debe ser: aprobada, aprobada_con_ajustes o requiere_cambios");
-        }
-
-        PilotExpertReview review = new PilotExpertReview();
-        review.setReviewerCode(request.getReviewerCode().trim());
-        review.setScores(scores);
-        review.setComments(request.getComments());
-        review.setVerdict(request.getVerdict());
-        return pilotExpertReviewRepository.save(review);
-    }
-
     public void deleteSession(String code) {
         String normalized = normalizeCode(code);
         PilotSession session = pilotSessionRepository.findByCode(normalized)
@@ -161,36 +126,6 @@ public class PilotService {
             cells.add(String.valueOf(participation.level));
             cells.add(String.valueOf(participation.aiQueries));
             cells.add(String.valueOf(participation.minutesBetweenTests));
-            csv.append(String.join(",", cells)).append('\n');
-        }
-        return csv.toString();
-    }
-
-    public String exportExpertCsv() {
-        StringBuilder csv = new StringBuilder("\uFEFF");
-        List<String> header = new ArrayList<>();
-        header.add("docente");
-        header.addAll(EXPERT_CRITERIA);
-        header.add("promedio");
-        header.add("comentarios");
-        header.add("veredicto");
-        header.add("fecha");
-        csv.append(String.join(",", header)).append('\n');
-
-        List<PilotExpertReview> reviews = pilotExpertReviewRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
-        for (PilotExpertReview review : reviews) {
-            List<String> cells = new ArrayList<>();
-            cells.add(esc(review.getReviewerCode()));
-            double sum = 0;
-            for (String criterion : EXPERT_CRITERIA) {
-                Integer value = review.getScores().get(criterion);
-                cells.add(value == null ? "" : String.valueOf(value));
-                sum += value == null ? 0 : value;
-            }
-            cells.add(String.format(Locale.ROOT, "%.2f", sum / EXPERT_CRITERIA.size()));
-            cells.add(esc(review.getComments()));
-            cells.add(review.getVerdict());
-            cells.add(review.getCreatedAt() == null ? "" : review.getCreatedAt().toString());
             csv.append(String.join(",", cells)).append('\n');
         }
         return csv.toString();

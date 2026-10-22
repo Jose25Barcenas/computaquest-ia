@@ -1,17 +1,14 @@
 package com.computaquest.service;
 
-import com.computaquest.dto.PilotExpertRequest;
 import com.computaquest.dto.PilotMotivationRequest;
 import com.computaquest.dto.PilotTestRequest;
 import com.computaquest.enums.MessageRole;
 import com.computaquest.exception.ValidationAppException;
 import com.computaquest.model.Chat;
-import com.computaquest.model.PilotExpertReview;
 import com.computaquest.model.PilotSession;
 import com.computaquest.model.Progress;
 import com.computaquest.model.User;
 import com.computaquest.repository.ChatRepository;
-import com.computaquest.repository.PilotExpertReviewRepository;
 import com.computaquest.repository.PilotSessionRepository;
 import com.computaquest.repository.ProgressRepository;
 import com.computaquest.repository.UserRepository;
@@ -36,8 +33,6 @@ class PilotServiceTest {
 
     @Mock
     private PilotSessionRepository pilotSessionRepository;
-    @Mock
-    private PilotExpertReviewRepository pilotExpertReviewRepository;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -142,38 +137,6 @@ class PilotServiceTest {
         request.setCode("P04");
         request.setAnswers(Map.of(1, 7));
         assertThrows(ValidationAppException.class, () -> pilotService.submitMotivation(request));
-    }
-
-    @Test
-    void submitExpertReviewValidaCriteriosYVeredicto() {
-        when(pilotExpertReviewRepository.save(any(PilotExpertReview.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        PilotExpertRequest request = new PilotExpertRequest();
-        request.setReviewerCode("DOCENTE");
-        request.setScores(Map.of(
-                "pertinencia", 4, "claridad", 5, "dificultad", 3,
-                "retroalimentacion_ia", 4, "diseno_gamificado", 5,
-                "facilidad_uso", 4, "aplicabilidad_aula", 4));
-        request.setComments("Buena aplicacion");
-        request.setVerdict("aprobada_con_ajustes");
-
-        PilotExpertReview review = pilotService.submitExpertReview(request);
-
-        assertEquals("DOCENTE", review.getReviewerCode());
-        assertEquals(7, review.getScores().size());
-        assertEquals("aprobada_con_ajustes", review.getVerdict());
-    }
-
-    @Test
-    void submitExpertReviewRechazaVeredictoInvalido() {
-        PilotExpertRequest request = new PilotExpertRequest();
-        request.setReviewerCode("DOCENTE");
-        request.setScores(Map.of(
-                "pertinencia", 4, "claridad", 5, "dificultad", 3,
-                "retroalimentacion_ia", 4, "diseno_gamificado", 5,
-                "facilidad_uso", 4, "aplicabilidad_aula", 4));
-        request.setVerdict("rechazada");
-        assertThrows(ValidationAppException.class, () -> pilotService.submitExpertReview(request));
     }
 
     @Test
