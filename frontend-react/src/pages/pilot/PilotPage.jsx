@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import api from '../../services/api'
 import { TEST_QUESTIONS, MOTIVATION_ITEMS, LIKERT_OPTIONS, PILLAR_LABELS } from './pilotInstrument'
 
@@ -145,9 +145,6 @@ export default function PilotPage() {
             {loading ? <i className="fa-solid fa-spinner fa-spin"></i> : <i className="fa-solid fa-arrow-right"></i>} Continuar
           </button>
         </form>
-        <p className="survey-subtitle" style={{ marginTop: '1.5rem' }}>
-          ¿Eres el docente? <Link to="/pilot/docente">Ir al formulario de validación</Link>
-        </p>
       </div>
     )
   }

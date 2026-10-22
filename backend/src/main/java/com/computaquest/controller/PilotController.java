@@ -1,9 +1,7 @@
 package com.computaquest.controller;
 
-import com.computaquest.dto.PilotExpertRequest;
 import com.computaquest.dto.PilotMotivationRequest;
 import com.computaquest.dto.PilotTestRequest;
-import com.computaquest.model.PilotExpertReview;
 import com.computaquest.model.PilotSession;
 import com.computaquest.service.PilotService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,11 +38,5 @@ public class PilotController {
     @Operation(summary = "Enviar cuestionario de motivacion del piloto", description = "6 items Likert + comentario abierto")
     public ResponseEntity<PilotSession> submitMotivation(@Valid @RequestBody PilotMotivationRequest request) {
         return ResponseEntity.ok(pilotService.submitMotivation(request));
-    }
-
-    @PostMapping("/expert")
-    @Operation(summary = "Enviar validacion del docente", description = "7 criterios 1-5, comentarios y veredicto")
-    public ResponseEntity<PilotExpertReview> submitExpert(@Valid @RequestBody PilotExpertRequest request) {
-        return ResponseEntity.ok(pilotService.submitExpertReview(request));
     }
 }

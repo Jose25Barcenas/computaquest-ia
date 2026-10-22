@@ -36,19 +36,3 @@ export const MOTIVATION_ITEMS = [
   { id: 5, text: 'Creo que esta forma de aprender me ayudaría a entender mejor la lógica y la programación.' },
   { id: 6, text: 'Me gustaría seguir usando la aplicación.' },
 ]
-
-export const EXPERT_CRITERIA = [
-  { key: 'pertinencia', label: 'Pertinencia del contenido para 8.° y 9.°' },
-  { key: 'claridad', label: 'Claridad del lenguaje' },
-  { key: 'dificultad', label: 'Nivel de dificultad' },
-  { key: 'retroalimentacion_ia', label: 'Calidad de la retroalimentación de la IA' },
-  { key: 'diseno_gamificado', label: 'Diseño gamificado' },
-  { key: 'facilidad_uso', label: 'Facilidad de uso' },
-  { key: 'aplicabilidad_aula', label: 'Aplicabilidad en el aula' },
-]
-
-export const EXPERT_VERDICTS = [
-  { value: 'aprobada', label: 'Aprobada' },
-  { value: 'aprobada_con_ajustes', label: 'Aprobada con ajustes' },
-  { value: 'requiere_cambios', label: 'Requiere cambios' },
-]

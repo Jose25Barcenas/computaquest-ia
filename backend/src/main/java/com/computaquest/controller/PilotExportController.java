@@ -39,14 +39,4 @@ public class PilotExportController {
         pilotService.deleteSession(code);
         return ResponseEntity.ok(Map.of("deleted", code.trim().toUpperCase(java.util.Locale.ROOT)));
     }
-
-    @GetMapping("/export-experto.csv")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Exportar validacion del docente", description = "CSV con las respuestas del experto (solo Admin)")
-    public ResponseEntity<String> exportExpert() {
-        return ResponseEntity.ok()
-                .contentType(new MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"piloto-validacion-docente.csv\"")
-                .body(pilotService.exportExpertCsv());
-    }
 }

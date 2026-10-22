@@ -100,15 +100,6 @@ export default function AdminPage() {
     }
   }
 
-  const handleExportPilotExpert = async () => {
-    try {
-      await api.exportPilotExpertCsv()
-      toast.success('CSV de validación descargado')
-    } catch {
-      toast.error('Error al exportar el CSV')
-    }
-  }
-
   const handleDeletePilotSession = async () => {
     const code = prompt('¿Qué sesión del piloto quieres borrar? (ej. P09)')
     if (!code || !code.trim()) return
@@ -219,9 +210,6 @@ export default function AdminPage() {
         <div className="admin-toolbar">
           <button className="btn-secondary btn-sm" onClick={handleExportPilot}>
             <i className="fa-solid fa-file-csv"></i> Exportar piloto (CSV)
-          </button>
-          <button className="btn-secondary btn-sm" onClick={handleExportPilotExpert}>
-            <i className="fa-solid fa-file-csv"></i> Exportar validación docente (CSV)
           </button>
           <button className="btn-secondary btn-sm" onClick={handleDeletePilotSession}>
             <i className="fa-solid fa-trash"></i> Borrar sesión piloto

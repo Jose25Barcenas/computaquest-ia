@@ -102,7 +102,7 @@ npm run dev
 | `SPRING_MAIL_HOST` | SMTP para recuperar contraseña (si no, `/forgot-password` → 503) | sin configurar |
 | `SPRING_MAIL_PORT` / `SPRING_MAIL_USERNAME` / `SPRING_MAIL_PASSWORD` | Credenciales SMTP | - |
 | `MAIL_FROM` | Remitiente de los emails | `noreply@computaquest.app` |
-| `TRUST_PROXY` | `true` solo detrás de un proxy (nginx/Railway) | `false` |
+| `TRUST_PROXY` | `true` solo detrás de un proxy (nginx) | `false` |
 | `APP_RATE_LIMIT_MAX_PER_MINUTE` (`app.rate-limit.max-per-minute`) | Peticiones máx/min por IP en `/api/auth/*`; `<=0` lo desactiva | `60` |
 | `APP_RATE_LIMIT_ENABLED` (`app.rate-limit.enabled`) | Activa el rate limit de autenticación | `true` |
 
@@ -206,14 +206,12 @@ Cualquier endpoint no listado en las secciones "No" devuelve **401 sin token** y
 - **Frontend:** React 18, Vite, React Router, Chart.js, Font Awesome
 - **IA:** OpenAI API (GPT-3.5-turbo)
 - **BD:** MongoDB 6
-- **Infra:** Docker, Docker Compose, Railway, Nginx
+- **Infra:** Docker, Docker Compose, Nginx
 - **Pruebas:** JUnit 5, MockMvc + Spring Security Test, Mockito, MongoDB embebido (Flapdoodle), Vitest + Testing Library
 
 ## Despliegue
 
-- **Frontend:** Netlify redespliega solo con cada push a `main`.
-- **Backend:** Railway conectado al repo (Root Directory: `backend`) con "Deploy on push". Si no dispara, se sube manual con `railway up -d`.
-- **Local:** `git pull` y luego `docker compose up -d --build` para reflejar los cambios.
+- **Servidor universitario:** `git pull` en la rama `deploy-universidad` y luego `docker compose -f docker-compose.prod.yml up -d --build` para reflejar los cambios.
 
 ## Autor
 
