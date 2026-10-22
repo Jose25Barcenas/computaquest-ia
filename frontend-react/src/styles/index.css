@@ -218,6 +218,8 @@ body {
 }
 .input-group input:focus, .input-group textarea:focus, .input-group select:focus { border-color: var(--primary); }
 .input-group textarea { resize: vertical; min-height: 80px; }
+.input-group select option,
+.form-group select option { color: #1a1a2e; background: #ffffff; }
 .input-group .input-error { border-color: var(--danger); }
 .input-group .input-error:focus { border-color: var(--danger); }
 .field-error { display: block; color: var(--danger); font-size: 0.78rem; margin-top: 0.3rem; }
