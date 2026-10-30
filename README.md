@@ -95,6 +95,7 @@ npm run dev
 | `JWT_SECRET` | Secreto para tokens JWT (mínimo 32 caracteres, **sin default**) | - (obligatorio) |
 | `JWT_EXPIRATION_MS` | Expiración del token (ms) | `604800000` (7 días) |
 | `OPENAI_API_KEY` | API Key de OpenAI | `NOT_CONFIGURED` |
+| `OPENAI_MODEL` | Modelo del tutor IA (`gpt-3.5-turbo` fue retirado por OpenAI el 23/10/2026) | `gpt-4o-mini` |
 | `CORS_ALLOWED_ORIGINS` | Orígenes permitidos por CORS (coma) | `http://localhost:3000` |
 | `FRONTEND_URL` | URL pública del frontend (links en emails) | `http://localhost:3000` |
 | `PORT` | Puerto del servidor | `4000` |
@@ -204,7 +205,7 @@ Cualquier endpoint no listado en las secciones "No" devuelve **401 sin token** y
 
 - **Backend:** Java 17, Spring Boot 3.2, Spring Data MongoDB, Spring Security, JWT (jjwt), Lombok
 - **Frontend:** React 18, Vite, React Router, Chart.js, Font Awesome
-- **IA:** OpenAI API (GPT-3.5-turbo)
+- **IA:** OpenAI API (gpt-4o-mini)
 - **BD:** MongoDB 6
 - **Infra:** Docker, Docker Compose, Nginx
 - **Pruebas:** JUnit 5, MockMvc + Spring Security Test, Mockito, MongoDB embebido (Flapdoodle), Vitest + Testing Library
